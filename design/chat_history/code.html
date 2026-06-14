@@ -1,0 +1,260 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InsightBot - Chat History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface-variant": "#424754",
+                      "on-error-container": "#93000a",
+                      "surface-container-low": "#f0f3ff",
+                      "on-tertiary-container": "#fbfdff",
+                      "primary-fixed-dim": "#adc6ff",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary": "#505f76",
+                      "surface-tint": "#005ac2",
+                      "on-tertiary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#ecf1ff",
+                      "surface": "#f9f9ff",
+                      "on-primary-fixed": "#001a42",
+                      "on-background": "#111c2d",
+                      "on-tertiary-fixed": "#191c1e",
+                      "secondary-fixed-dim": "#b7c8e1",
+                      "error": "#ba1a1a",
+                      "surface-container-highest": "#d8e3fb",
+                      "tertiary": "#595c5e",
+                      "on-secondary": "#ffffff",
+                      "surface-variant": "#d8e3fb",
+                      "surface-container": "#e7eeff",
+                      "outline-variant": "#c2c6d6",
+                      "on-error": "#ffffff",
+                      "on-secondary-container": "#54647a",
+                      "background": "#f9f9ff",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed": "#d3e4fe",
+                      "outline": "#727785",
+                      "on-secondary-fixed-variant": "#38485d",
+                      "inverse-surface": "#263143",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "tertiary-fixed": "#e0e3e5",
+                      "surface-container-high": "#dee8ff",
+                      "primary": "#0058be",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "on-primary-container": "#fefcff",
+                      "inverse-primary": "#adc6ff",
+                      "on-primary-fixed-variant": "#004395",
+                      "primary-fixed": "#d8e2ff",
+                      "on-secondary-fixed": "#0b1c30",
+                      "surface-bright": "#f9f9ff",
+                      "surface-dim": "#cfdaf2",
+                      "secondary-container": "#d0e1fb",
+                      "tertiary-container": "#727577",
+                      "primary-container": "#2170e4",
+                      "on-surface": "#111c2d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-gap-sm": "0.5rem",
+                      "stack-gap-md": "1rem",
+                      "container-margin": "1rem",
+                      "bubble-padding-x": "1rem",
+                      "card-padding": "1.25rem",
+                      "max-width-mobile": "100%",
+                      "bubble-padding-y": "0.75rem"
+              },
+              "fontFamily": {
+                      "chat-bubble": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "label-lg": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "chat-bubble": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .glass-header {
+            backdrop-filter: blur(12px);
+            background-color: rgba(249, 249, 255, 0.85);
+        }
+        .chat-card {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .chat-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- TopAppBar Component -->
+<header class="fixed top-0 w-full z-50 glass-header flex items-center justify-between px-container-margin h-16 transition-all">
+<div class="flex items-center gap-4">
+<button class="hover:bg-surface-variant transition-colors rounded-full p-2 active:opacity-80 scale-95 transition-all">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">InsightBot</h1>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a young male executive with a warm, friendly expression, set against a blurred corporate office background. The lighting is soft and natural, emphasizing a professional yet approachable aesthetic consistent with a modern light-mode interface. The color palette is composed of soft blues and crisp whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAuVPraLpElYJxi69w2H4ZyVIJtEZd0Vyq2kbzfFgDvJuTK9x1QMGUIgKqCIIRDSfXduy6uyZeWN5XDVkOK6gDWYgLgXa0ZaGp_ZEHdwqG2exgT-ZId-upUXvPr5uj6eZPWnVUSPwNbzveG_q1W6zmjP5hy2JqHSkLGH5AYrT1wybvGNZKqdn4VYCwfjPmG4kDZUJkdTKoPsCnS5ECJFVXcm-mUV6ygXfzdqpUIj_fJXwE1GtqFfe5q_ImOBMUWNUvoDK96U-l4hTq">
+</div>
+</div>
+</header>
+<main class="pt-20 px-container-margin max-w-2xl mx-auto">
+<!-- Search & Filter Area -->
+<div class="mt-6 mb-8">
+<h2 class="font-headline-lg text-headline-lg mb-4 text-on-surface">History</h2>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container rounded-2xl border-none focus:ring-2 focus:ring-primary/20 text-body-lg font-body-lg text-on-surface placeholder:text-on-surface-variant/60 shadow-sm" placeholder="Search conversations..." type="text">
+</div>
+</div>
+<!-- Chat List - Bento Style approach -->
+<div class="space-y-4">
+<!-- Chat Item 1 -->
+<div class="chat-card bg-surface-container-lowest p-card-padding rounded-2xl shadow-sm border border-outline-variant/30 flex gap-4 cursor-pointer hover:border-primary/30">
+<div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-label-lg text-label-lg text-on-surface truncate">Q4 Report Summary</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant shrink-0 ml-2">2h ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">The revenue growth exceeded projections by 12% following the...</p>
+</div>
+</div>
+<!-- Chat Item 2 -->
+<div class="chat-card bg-surface-container-lowest p-card-padding rounded-2xl shadow-sm border border-outline-variant/30 flex gap-4 cursor-pointer hover:border-primary/30">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-secondary-fixed-variant" data-weight="fill" style="font-variation-settings: 'FILL' 1;">event_note</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-label-lg text-label-lg text-on-surface truncate">Project Planning</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant shrink-0 ml-2">Yesterday</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">I've outlined the milestones for the upcoming sprint. Shall we...</p>
+</div>
+</div>
+<!-- Chat Item 3 -->
+<div class="chat-card bg-surface-container-lowest p-card-padding rounded-2xl shadow-sm border border-outline-variant/30 flex gap-4 cursor-pointer hover:border-primary/30">
+<div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">code</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-label-lg text-label-lg text-on-surface truncate">Python Bug Fix</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant shrink-0 ml-2">Oct 24</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">The syntax error was caused by a missing indentation in the...</p>
+</div>
+</div>
+<!-- Chat Item 4 -->
+<div class="chat-card bg-surface-container-lowest p-card-padding rounded-2xl shadow-sm border border-outline-variant/30 flex gap-4 cursor-pointer hover:border-primary/30">
+<div class="w-12 h-12 rounded-xl bg-primary-container/40 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-label-lg text-label-lg text-on-surface truncate">Gift Ideas for Mom</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant shrink-0 ml-2">Oct 22</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">Based on her interests in gardening and reading, here are 5...</p>
+</div>
+</div>
+<!-- Chat Item 5 -->
+<div class="chat-card bg-surface-container-lowest p-card-padding rounded-2xl shadow-sm border border-outline-variant/30 flex gap-4 cursor-pointer hover:border-primary/30">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-secondary-fixed-variant" data-weight="fill" style="font-variation-settings: 'FILL' 1;">travel_explore</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-label-lg text-label-lg text-on-surface truncate">Tokyo Itinerary</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant shrink-0 ml-2">Oct 20</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">Recommended visiting Shibuya Crossing during the evening for...</p>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for New Chat -->
+<button class="fixed right-6 bottom-24 bg-primary text-on-primary w-14 h-14 rounded-2xl shadow-lg flex items-center justify-center z-40 transition-transform active:scale-90 hover:shadow-xl group">
+<span class="material-symbols-outlined text-[28px] group-hover:rotate-90 transition-transform duration-300">add</span>
+</button>
+<!-- BottomNavBar Component -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-surface-dim border-t border-outline-variant dark:border-outline shadow-sm">
+
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-xl px-3 py-1 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="font-label-sm text-label-sm">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-container dark:text-on-secondary-fixed-variant px-3 py-1 hover:bg-secondary-container/50 rounded-xl transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-label-sm text-label-sm">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-container dark:text-on-secondary-fixed-variant px-3 py-1 hover:bg-secondary-container/50 rounded-xl transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<script>
+        // Simple search filtering simulation
+        const searchInput = document.querySelector('input[type="text"]');
+        const chatCards = document.querySelectorAll('.chat-card');
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            chatCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const snippet = card.querySelector('p').textContent.toLowerCase();
+                if (title.includes(term) || snippet.includes(term)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Add subtle hover effect for cards
+        chatCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('shadow-md');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('shadow-md');
+            });
+        });
+    </script>
+
+
+</body></html>

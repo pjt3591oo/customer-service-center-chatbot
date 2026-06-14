@@ -1,0 +1,3 @@
+language: ko
+model: ollama_chat/gemma3:27b
+pageindex_threshold: 20
