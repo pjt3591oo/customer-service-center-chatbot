@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider        = "prisma-client-js"
+  engineType = "binary"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+model QnaCache {
+  id        Int      @id @default(autoincrement())
+  sourceId  String   @map("source_id")
+  version   Int      @default(1)
+  question  String
+  answer    String
+  section   String?
+  embedding Unsupported("vector(768)")?
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([sourceId, version, status], name: "qna_cache_source_version_idx")
+  @@map("qna_cache")
+}
+
+enum ChatMode {
+  AGENT     @map("AGENT")
+  REALTIME @map("REALTIME")
+}
+
+enum MessageFrom {
+  USER   @map("USER")
+  BOT    @map("BOT")
+  SYSTEM @map("SYSTEM")
+  ADMIN  @map("ADMIN")
+}
+
+
+model Chat {
+  id            String      @id @db.Uuid
+  chatSessionId String      @map("chat_session_id")
+  from          MessageFrom
+  content       String
+  mode          ChatMode
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@index([chatSessionId], name: "chat_session_id_idx")
+  @@map("chat")
+}
