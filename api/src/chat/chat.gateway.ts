@@ -19,15 +19,13 @@ export class ChatGateway {
   async handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
 
-    const { chatSessionId, chats: chatsString = '[]' } = client.handshake
-      ?.query as {
+    const { chatSessionId } = client.handshake?.query as {
       chatSessionId?: string;
-      chats: string;
     };
 
-    const chats = JSON.parse(chatsString) as Msg[];
-    console.log('Parsed chats from handshake query:', chats);
+    // const chats = JSON.parse(chatsString) as Msg[];
     if (chatSessionId) {
+      console.log(`Client joining chat session: ${chatSessionId}`);
       await client.join(chatSessionId);
     }
   }
@@ -50,10 +48,10 @@ export class ChatGateway {
     // @ConnectedSocket() client: Socket,
     @MessageBody() payload: { chatSessionId: string; msg: string },
   ): Promise<void> {
+    console.log(payload);
     const msg = this.generateMsgFromPayload(payload, From.USER);
 
-    await this.chatService.saveChat([msg]);
-    console.log(this.server);
+    await this.chatService.addChat(payload.chatSessionId, [msg]);
     console.log(payload.chatSessionId);
     this.server?.to(payload.chatSessionId).emit('message', msg); // 해당 채팅 세션 ID를 가진 클라이언트에게 메시지 전송
 
@@ -67,7 +65,7 @@ export class ChatGateway {
   ): Promise<void> {
     const msg = this.generateMsgFromPayload(payload, From.ADMIN);
 
-    await this.chatService.saveChat([msg]);
+    await this.chatService.addChat(payload.chatSessionId, [msg]);
 
     this.server?.to(payload.chatSessionId).emit('message', msg); // 해당 채팅 세션 ID를 가진 클라이언트에게 메시지 전송
 

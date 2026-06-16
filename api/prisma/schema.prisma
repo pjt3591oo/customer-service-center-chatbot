@@ -42,6 +42,16 @@ enum MessageFrom {
 }
 
 
+model ChatSession {
+  id        String   @id @db.Uuid
+  chatSessionId    String   @map("chat_session_id")
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([chatSessionId], name: "chat_session_chat_session_id_idx")
+  @@map("chat_session")
+}
+
 model Chat {
   id            String      @id @db.Uuid
   chatSessionId String      @map("chat_session_id")

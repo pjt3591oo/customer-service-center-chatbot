@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ChatAdmin Pro - Session Manager</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#263143",
+                        "tertiary-container": "#727577",
+                        "surface-container": "#e7eeff",
+                        "secondary-container": "#d0e1fb",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface-tint": "#005ac2",
+                        "surface-container-high": "#dee8ff",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-tertiary-container": "#fbfdff",
+                        "on-surface-variant": "#424754",
+                        "inverse-primary": "#adc6ff",
+                        "inverse-on-surface": "#ecf1ff",
+                        "on-surface": "#111c2d",
+                        "secondary": "#505f76",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f0f3ff",
+                        "primary-fixed": "#d8e2ff",
+                        "outline-variant": "#c2c6d6",
+                        "surface-variant": "#d8e3fb",
+                        "surface-container-highest": "#d8e3fb",
+                        "primary": "#0058be",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#727785",
+                        "on-secondary-fixed": "#0b1c30",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#111c2d",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#cfdaf2",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "on-tertiary-fixed": "#191c1e",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface": "#f9f9ff",
+                        "on-primary": "#ffffff",
+                        "background": "#f9f9ff",
+                        "tertiary": "#595c5e",
+                        "on-secondary-container": "#54647a",
+                        "secondary-fixed": "#d3e4fe",
+                        "primary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed": "#e0e3e5",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f9f9ff",
+                        "primary-container": "#2170e4",
+                        "on-primary-container": "#fefcff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "chat-bubble": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .chat-canvas { height: calc(100vh - 4rem - 5rem); }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-surface-container dark:bg-inverse-surface border-r border-outline-variant dark:border-outline z-50">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+</div>
+<div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed">ChatAdmin Pro</h1>
+<p class="text-label-sm font-label-sm opacity-70">Enterprise Plan</p>
+</div>
+</div>
+<nav class="space-y-1">
+<!-- Dashboard (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-variant dark:hover:bg-surface-container-highest transition-colors rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-label-lg font-label-lg">Dashboard</span>
+</a>
+<!-- Chat Sessions (Active) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-on-secondary-fixed rounded-xl opacity-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="text-label-lg font-label-lg">Chat Sessions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-variant dark:hover:bg-surface-container-highest transition-colors rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-label-lg font-label-lg">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-variant dark:hover:bg-surface-container-highest transition-colors rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-label-lg font-label-lg">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-variant dark:hover:bg-surface-container-highest transition-colors rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-label-lg font-label-lg">Help</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6 border-t border-outline-variant">
+<button class="w-full bg-primary text-on-primary py-3 px-4 rounded-xl font-label-lg flex items-center justify-center gap-2 mb-4 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                New Bot Instance
+            </button>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-variant rounded-xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-label-lg font-label-lg">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex flex-col h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-6 h-16 bg-surface dark:bg-background shadow-sm z-40">
+<div class="flex items-center gap-4">
+<h2 class="text-headline-md font-headline-md font-extrabold text-primary dark:text-inverse-primary">Session Manager</h2>
+<div class="h-6 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="text-label-sm font-label-sm">Active Sessions:</span>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-xs font-bold">24</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64 transition-all" placeholder="Search sessions..." type="text"/>
+</div>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="flex items-center gap-2 pl-2 border-l border-outline-variant">
+<img alt="Admin profile photo" class="w-8 h-8 rounded-full bg-surface-container-highest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEECDqkZ4yB9bSL9RzXaTZepaGV5rpMpepSoEnyZMQUncyDhrVy4GZydA1Q0imrbw7CKqtmea_HBjhCU-cQueZIqRZqUSwbjYr5X4dnF-bZz5S3RK_V1Gexcqr5MAy5kd-sE_fQhGGqzfRMO8fHO0_rWRrE6I6bmaKVDoTmp7VHFgNQlLKd37AJ5gC6KJHHF_lFbcYEszANjKTRKkGiHor8yiphD2jWk1GQLCwX4UgyCqeCNiVVJ-L20JsU-inkFn_A-G7fuoVgOJI"/>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Page Grid Layout -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Panel: Session List -->
+<section class="w-80 flex flex-col bg-surface border-r border-outline-variant overflow-y-auto">
+<div class="p-4 border-b border-outline-variant bg-surface-container-lowest">
+<div class="flex gap-2 mb-4 overflow-x-auto pb-1">
+<button class="whitespace-nowrap px-3 py-1.5 rounded-full bg-primary text-on-primary text-xs font-bold">All</button>
+<button class="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-container-high text-on-secondary-container text-xs font-semibold hover:bg-surface-variant transition-colors">Active</button>
+<button class="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-container-high text-on-secondary-container text-xs font-semibold hover:bg-surface-variant transition-colors">Pending</button>
+<button class="whitespace-nowrap px-3 py-1.5 rounded-full bg-surface-container-high text-on-secondary-container text-xs font-semibold hover:bg-surface-variant transition-colors">Closed</button>
+</div>
+</div>
+<!-- Session Items -->
+<div class="flex-1">
+<!-- Active Item -->
+<div class="p-4 bg-secondary-container/30 border-l-4 border-primary cursor-pointer transition-colors">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="User Profile" class="w-10 h-10 rounded-full object-cover" data-alt="A high-quality professional headshot of a young woman with a friendly expression, set against a soft-focus urban background. The lighting is natural and bright, matching the professional and serene UI aesthetic. The color palette is clean with subtle cool tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMR8spxo6iIfpwZJ0hTZEaG_OFIEOaOEmYrhqOPARbZEAwcbtOzuq08mRpIFEJQsWkgmx-Z0Ppn-r_Ya2cEl5EeyzJBUM6aSOJjb6UNUafxFGnzbXnbxrspmcMpdnw1FBYKlbm4vb8uqpbWkd1qaaQ4T2XrmdLYpFCMrfp6MyV1h5iaxkS741hl1mu7wqvQ2FivJMq7i5Zg3jRuB2cqd9m4FrwqmF7VmQq441zijR75Uq2dEyVDLM3MUvInAOwXa0iI-57Xetq7SiV"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface text-sm">Elena Rodriguez</h4>
+<p class="text-xs text-on-surface-variant truncate w-40">The API keeps returning a 403 error...</p>
+</div>
+</div>
+<span class="text-[10px] text-outline font-medium">2m ago</span>
+</div>
+</div>
+<!-- Inactive Items -->
+<div class="p-4 hover:bg-surface-container-low cursor-pointer transition-colors border-b border-outline-variant/30">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="User Profile" class="w-10 h-10 rounded-full object-cover" data-alt="A sharp, clear portrait of a professional man in a crisp white shirt, smiling warmly. The setting is a bright, modern office with soft daylight and a clean minimalist background. The visual style is consistent with a high-end, corporate software environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnyQozVB3neBawX-5yD7BoKoL8_qRCrc7E2WBh1vn2rLY_-lJt0Ir62Mq_qIqscAU5d6h1zAMLsUHE2xuzohYsI77ySnUBUpM41tVP159kGt11r_TQHQWxpVwbcuALazowLQYvtFmGmK_1zlZCqHI6yONZP0li0GPr3cRy93tPp-5ZOwdqRvDizVhfkjlb0y62Ycll_2O8JATukY__WMTLLDZUNyM56_9xLhleR93n5GIByJpU2MyeukKCo8EAY0WCf06rdRFD7L5Y"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 bg-outline rounded-full border-2 border-white"></span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface text-sm opacity-80">Marcus Chen</h4>
+<p class="text-xs text-on-surface-variant truncate w-40">Thanks for the update on the dashboard.</p>
+</div>
+</div>
+<span class="text-[10px] text-outline font-medium">1h ago</span>
+</div>
+</div>
+<div class="p-4 hover:bg-surface-container-low cursor-pointer transition-colors border-b border-outline-variant/30">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-3">
+<img alt="User Profile" class="w-10 h-10 rounded-full object-cover grayscale" data-alt="A professional studio portrait of a woman with a confident gaze, rendered in a soft-key lighting style. The background is a solid neutral gray to maintain a corporate aesthetic. The overall mood is focused and serene, fitting the app's professional theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqGkh6LpMq3RLgT8f9Q8qDPW7fFMD7MVlUC3Luj05MShyE5KiFnUooPnp4-bPR1fjdtG410edTbSum-Paisx_J7E_5wPlyY1nL14Cbrdlg194XkXpRG5uE3tfqa9KtUCh2thWu-SuCySi46nlIa0LUtQkiN2MMD_5b7btPtAYsZr_6ZCZHt2oLbQXLHQhnpS89texwyfxQX22cI6unBQA13U_4I4fl8SFi4awdNzRH-afhiABTW8Dr4w4XfaADwDNDojtdis80WeyC"/>
+<div>
+<h4 class="font-bold text-on-surface text-sm opacity-80">Sarah Jenkins</h4>
+<p class="text-xs text-on-surface-variant truncate w-40">Can we schedule a call for Monday?</p>
+</div>
+</div>
+<span class="text-[10px] text-outline font-medium">3h ago</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Main Panel: Chat Interface -->
+<section class="flex-1 flex flex-col bg-background relative overflow-hidden">
+<!-- Chat Header -->
+<div class="px-6 py-4 bg-surface shadow-sm flex justify-between items-center z-10">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full border-2 border-primary-container p-0.5">
+<img alt="Elena Rodriguez" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBIu76_hVF2ZYJBsC0r_YAmPVf8V_IE-7tP_dkGDJyG_T8RhkAAReCskkzMcCQcIdeAG0TegIKXYuirmI5m4eGdUJ9x_nN6tF3BeLS0LG3ssamCsnlERsC9swdk2AXT6qCQhsToM1YeaRt1cgKK29iPelynrIw86cIU1WeZ4CedJJfJhE_vG9EGtryXtRlR9u_NWqtIsENBCvTkbnsI9AuLSjyef_mvchDusX8bRSwjI7u1VAiNRhB39y01IfYUaeRI5iHouHsc82M"/>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-lg text-on-surface">Elena Rodriguez</h3>
+<span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase tracking-wider">Online</span>
+</div>
+<p class="text-xs text-on-surface-variant">elena.r@corporate.com • San Francisco, CA</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg text-sm font-semibold hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+                            Logs
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-error-container text-on-error-container rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="block">block</span>
+                            End Session
+                        </button>
+</div>
+</div>
+<!-- Chat Canvas (Message History) -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6 bg-[#f9f9ff]">
+<!-- Date Divider -->
+<div class="flex items-center justify-center gap-4">
+<div class="h-px flex-1 bg-outline-variant/30"></div>
+<span class="text-[11px] font-bold text-outline uppercase tracking-widest">Today</span>
+<div class="h-px flex-1 bg-outline-variant/30"></div>
+</div>
+<!-- Bot Message -->
+<div class="flex flex-col gap-1 items-start max-w-[80%]">
+<div class="flex items-center gap-2 ml-1 mb-1">
+<div class="w-5 h-5 rounded-full bg-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white" data-icon="smart_toy">smart_toy</span>
+</div>
+<span class="text-[11px] font-bold text-tertiary">Support Bot</span>
+<span class="text-[10px] text-outline">10:45 AM</span>
+</div>
+<div class="bg-surface-container-low text-on-surface-variant p-4 rounded-2xl rounded-tl-none shadow-sm border border-outline-variant/20 font-chat-bubble text-chat-bubble">
+                            Hello Elena! I see you're having trouble with the API connection. Could you please provide the endpoint you're trying to reach?
+                        </div>
+</div>
+<!-- User Message -->
+<div class="flex flex-col gap-1 items-end ml-auto max-w-[80%]">
+<div class="flex items-center gap-2 mr-1 mb-1">
+<span class="text-[10px] text-outline">10:46 AM</span>
+<span class="text-[11px] font-bold text-primary">Elena Rodriguez</span>
+</div>
+<div class="bg-primary text-on-primary p-4 rounded-2xl rounded-tr-none shadow-md font-chat-bubble text-chat-bubble">
+                            I'm trying to hit the /v2/sessions/analytics endpoint, but it keeps giving me a 403 Forbidden error. I've checked my API key twice.
+                        </div>
+</div>
+<!-- Action Card / Structured Info -->
+<div class="flex flex-col gap-1 items-start max-w-[80%]">
+<div class="flex items-center gap-2 ml-1 mb-1">
+<div class="w-5 h-5 rounded-full bg-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white" data-icon="smart_toy">smart_toy</span>
+</div>
+<span class="text-[11px] font-bold text-tertiary">Support Bot</span>
+</div>
+<div class="bg-white border border-tertiary-fixed-dim rounded-2xl p-bubble-padding-y p-bubble-padding-x shadow-[0px_4px_12px_rgba(0,0,0,0.05)] w-full sm:w-80">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="error">error</span>
+</div>
+<h5 class="text-sm font-bold text-on-surface">System Diagnostics</h5>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">I've detected a scope mismatch in your current API token. It lacks 'read:analytics' permissions.</p>
+<button class="w-full py-2 bg-surface-container text-primary text-xs font-bold rounded-lg hover:bg-secondary-container transition-colors">
+                                View Token Permissions
+                            </button>
+</div>
+</div>
+<!-- Admin Message (The "Admin" replying) -->
+<div class="flex flex-col gap-1 items-end ml-auto max-w-[80%]">
+<div class="flex items-center gap-2 mr-1 mb-1">
+<span class="text-[10px] text-outline">Just now</span>
+<span class="text-[11px] font-bold text-primary">Admin (You)</span>
+</div>
+<div class="bg-primary-container text-on-primary-container p-4 rounded-2xl rounded-tr-none shadow-md font-chat-bubble text-chat-bubble">
+                            Hi Elena, I'm jumping in here. I can manually elevate your token's scope for this endpoint. Give me just a second to update our records.
+                        </div>
+</div>
+</div>
+<!-- Quick Replies -->
+<div class="px-6 py-2 bg-background flex gap-2 overflow-x-auto no-scrollbar">
+<button class="whitespace-nowrap px-4 py-1.5 border-[1.5px] border-primary/40 text-primary rounded-full text-xs font-semibold hover:bg-primary-container/10 transition-colors">Grant Analytics Access</button>
+<button class="whitespace-nowrap px-4 py-1.5 border-[1.5px] border-primary/40 text-primary rounded-full text-xs font-semibold hover:bg-primary-container/10 transition-colors">Reset API Keys</button>
+<button class="whitespace-nowrap px-4 py-1.5 border-[1.5px] border-primary/40 text-primary rounded-full text-xs font-semibold hover:bg-primary-container/10 transition-colors">Send Documentation</button>
+<button class="whitespace-nowrap px-4 py-1.5 border-[1.5px] border-primary/40 text-primary rounded-full text-xs font-semibold hover:bg-primary-container/10 transition-colors">Escalate to Tech</button>
+</div>
+<!-- Input Area -->
+<div class="p-4 bg-surface border-t border-outline-variant">
+<div class="max-w-4xl mx-auto flex items-end gap-3 bg-surface-container-low rounded-[2rem] p-2 shadow-sm focus-within:shadow-md transition-shadow border border-outline-variant/30">
+<button class="p-3 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+</button>
+<textarea class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 px-2 resize-none max-h-32 overflow-y-auto" placeholder="Type a professional response..." rows="1"></textarea>
+<button class="p-3 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="mood">mood</span>
+</button>
+<button class="w-10 h-10 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+<p class="text-[10px] text-center mt-2 text-outline">Press Shift + Enter for new line • Elena will see your reply immediately</p>
+</div>
+<!-- Floating Atmospheric Element (Shader/Animation Placeholder) -->
+<div class="absolute bottom-24 right-8 pointer-events-none opacity-20">
+
+</div>
+</section>
+</div>
+</main>
+<script>
+        // Simple textarea auto-resize logic
+        const textarea = document.querySelector('textarea');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Mock interaction for clicking session items
+        const sessionItems = document.querySelectorAll('section.w-80 > div.flex-1 > div');
+        sessionItems.forEach(item => {
+            item.addEventListener('click', () => {
+                sessionItems.forEach(i => {
+                    i.classList.remove('bg-secondary-container/30', 'border-l-4', 'border-primary');
+                    i.classList.add('hover:bg-surface-container-low');
+                });
+                item.classList.add('bg-secondary-container/30', 'border-l-4', 'border-primary');
+                item.classList.remove('hover:bg-surface-container-low');
+            });
+        });
+    </script>
+</body></html>

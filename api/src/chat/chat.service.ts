@@ -96,7 +96,9 @@ export class ChatService {
         subscriber.next({
           data: content,
         });
+        console.log(content);
       }
+      console.log('Final generated content:', content);
 
       // cache 저장
       const version = await fs.readFile(
@@ -117,17 +119,41 @@ export class ChatService {
     subscriber.complete();
   }
 
-  async saveChat(msg: Msg[]): Promise<void> {
+  async syncChat(chatSessionId: string, msg: Msg[]): Promise<void> {
+    console.log('Saving chat messages:', msg);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const chatSession = await this.prisma.chatSession.findFirst({
+      where: { id: chatSessionId },
+    });
+    if (chatSession) {
+      await this.addChat(chatSessionId, msg);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    await this.prisma.chatSession.create({
+      data: {
+        id: uuidv7(),
+        chatSessionId,
+        status: 'active',
+      },
+    });
+
+    await this.addChat(chatSessionId, msg);
+  }
+
+  async addChat(chatSessionId: string, msg: Msg[]): Promise<void> {
     const data = msg.map((m) => ({
       id: uuidv7(),
-      chatSessionId: m.chatSessionId,
+      chatSessionId,
       from: FromToMessageFrom[m.from],
       content: m.content,
       mode: ChatModeToPrisma[m.mode],
     }));
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    await this.prisma.chat.createMany({ data });
+    if (data.length > 0) {
+      await this.prisma.chat.createMany({ data });
+    }
   }
 
   async getChatHistory(chatSessionId: string): Promise<Msg[]> {

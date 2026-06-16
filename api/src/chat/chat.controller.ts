@@ -26,8 +26,11 @@ export class ChatController {
   }
 
   @Post('/sync')
-  async syncChat(@Body() body: Msg[]): Promise<{ success: boolean }> {
-    await this.chatService.saveChat(body);
+  async syncChat(
+    @Query('chatSessionId') chatSessionId: string,
+    @Body() msgs: Msg[],
+  ): Promise<{ success: boolean }> {
+    await this.chatService.syncChat(chatSessionId, msgs);
     return { success: true };
   }
 }
