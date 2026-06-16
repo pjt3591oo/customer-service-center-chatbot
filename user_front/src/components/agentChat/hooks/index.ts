@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { usePGlite, useLiveQuery } from '@electric-sql/pglite-react';
 import { fetchSSE } from '../../../utils/sse';
 import io from "socket.io-client";
+import { uuidv7 } from 'uuidv7';
 
 export interface Chat {
-  id?: number;
+  id: string;
   chatSessionId: string;
   from: 'USER' | 'BOT' | 'ADMIN' | 'SYSTEM';
   content: string;
@@ -45,11 +46,11 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
   const chats: Chat[] = result?.rows ?? [];
 
   // ── 메시지 저장 헬퍼 ──────────────────────────────────
-  const saveChat = async (chat: Omit<Chat, 'id'>) => {
+  const saveChat = async (chat: Chat) => {
     await db.query(`
-      INSERT INTO chat (chatSessionId, "from", content, mode)
-      VALUES ($1, $2, $3, $4)
-    `, [chat.chatSessionId, chat.from, chat.content, chat.mode]);
+      INSERT INTO chat (id, chatSessionId, "from", content, mode)
+      VALUES ($1, $2, $3, $4, $5)
+    `, [chat.id, chat.chatSessionId, chat.from, chat.content, chat.mode]);
   };
 
   // ── REALTIME 모드 전환 ────────────────────────────────
@@ -67,6 +68,27 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
 
   async function connectRealTimeChat() {
 
+    const lastChat = chats[chats.length - 1];
+    const lastId = lastChat?.id ?? 0;
+    const res = await fetch(`http://localhost:3000/chat/history?chatSessionId=${chatSessionId}&lastId=${lastId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await res.json();
+    console.log('Fetched chat history:', data);
+    data.forEach((chat: Chat) => {
+      saveChat({
+        id: chat.id,
+        chatSessionId: chat.chatSessionId,
+        from: chat.from,
+        content: chat.content,
+        mode: "REALTIME",
+      });
+    });
+
     socketRef.current = io(`http://127.0.0.1:3001/chat`, {
       transports: ["websocket"],
       query: { chatSessionId },
@@ -74,6 +96,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
 
     socketRef.current.on('message', async (incoming: Chat) => {
       await saveChat({
+        id: uuidv7(),
         chatSessionId: incoming.chatSessionId,
         from: incoming.from,
         content: incoming.content,
@@ -82,6 +105,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
     });
 
     await saveChat({
+      id: uuidv7(),
       chatSessionId,
       from: "SYSTEM",
       content: "상담원과 연결되었습니다.",
@@ -98,6 +122,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
       const payload = { msg, chatSessionId };
 
       await saveChat({
+        id: uuidv7(),
         chatSessionId,
         from: 'USER',
         content: msg,
@@ -122,6 +147,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
 
     for (const candidate of parsedData.qna_candidates) {
       await saveChat({
+        id: uuidv7(),
         chatSessionId,
         from: 'BOT',
         content: candidate.answer,
@@ -144,6 +170,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
 
     if (newMode === "REALTIME") {
       await saveChat({
+        id: uuidv7(),
         chatSessionId,
         from: "SYSTEM",
         content: "상담원과 연결중입니다.",

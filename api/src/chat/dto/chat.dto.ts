@@ -13,6 +13,7 @@ export enum From {
 }
 
 export interface Msg {
+  id: string;
   chatSessionId: string;
   from: MessageFrom;
   content: string;

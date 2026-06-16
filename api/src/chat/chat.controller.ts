@@ -11,9 +11,9 @@ export class ChatController {
   @Get('/history')
   async getChatHistory(
     @Query('chatSessionId') chatSessionId: string,
+    @Query('lastId') lastId?: string,
   ): Promise<Msg[]> {
-    const chatHistory = await this.chatService.getChatHistory(chatSessionId);
-    return chatHistory;
+    return this.chatService.getChatHistory(chatSessionId, lastId);
   }
 
   @Sse('/agent')
@@ -32,5 +32,10 @@ export class ChatController {
   ): Promise<{ success: boolean }> {
     await this.chatService.syncChat(chatSessionId, msgs);
     return { success: true };
+  }
+
+  @Get('/sessions')
+  async getChatSession(): Promise<any> {
+    return this.chatService.getChatSessions();
   }
 }

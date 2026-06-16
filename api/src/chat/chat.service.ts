@@ -125,10 +125,13 @@ export class ChatService {
     const chatSession = await this.prisma.chatSession.findFirst({
       where: { id: chatSessionId },
     });
+    console.log('Found chat session:', chatSession);
     if (chatSession) {
+      console.log('Chat session already exists, adding chat messages');
       await this.addChat(chatSessionId, msg);
     }
 
+    console.log('Creating new chat session with ID:', chatSessionId);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     await this.prisma.chatSession.create({
       data: {
@@ -138,28 +141,31 @@ export class ChatService {
       },
     });
 
+    console.log('Chat session created, adding chat messages');
     await this.addChat(chatSessionId, msg);
   }
 
   async addChat(chatSessionId: string, msg: Msg[]): Promise<void> {
     const data = msg.map((m) => ({
-      id: uuidv7(),
+      id: m.id,
       chatSessionId,
       from: FromToMessageFrom[m.from],
       content: m.content,
       mode: ChatModeToPrisma[m.mode],
     }));
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     if (data.length > 0) {
       await this.prisma.chat.createMany({ data });
     }
   }
 
-  async getChatHistory(chatSessionId: string): Promise<Msg[]> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  async getChatHistory(chatSessionId: string, lastId?: string): Promise<Msg[]> {
+    const where = {
+      chatSessionId,
+      ...(lastId ? { id: { gt: lastId } } : {}),
+    };
     const chats: Chat[] = await this.prisma.chat.findMany({
-      where: { chatSessionId },
+      where,
       orderBy: { createdAt: 'asc' },
     });
 
@@ -168,10 +174,25 @@ export class ChatService {
     }
 
     return chats.map((chat) => ({
+      id: chat.id,
       chatSessionId: chat.chatSessionId,
       from: chat.from,
       content: chat.content,
       mode: chat.mode,
+    }));
+  }
+
+  async getChatSessions(): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const sessions = await this.prisma.chatSession.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return sessions.map((session) => ({
+      chatSessionId: session.chatSessionId,
+      status: session.status,
+      mode: 'REALTIME',
+      createdAt: session.createdAt,
     }));
   }
 }

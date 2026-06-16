@@ -8,6 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { From, Msg, ChatMode } from './dto/chat.dto';
 import { ChatService } from './chat.service';
+import { uuidv7 } from 'uuidv7';
 
 @WebSocketGateway(3001, { cors: true, namespace: 'chat' })
 export class ChatGateway {
@@ -77,6 +78,7 @@ export class ChatGateway {
     from: From,
   ): Msg {
     return {
+      id: uuidv7(),
       chatSessionId: payload.chatSessionId,
       from,
       content: payload.msg,
