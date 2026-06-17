@@ -2,51 +2,44 @@ import {
   History,
   Plus,
   Search,
-  Settings
 } from "lucide-react";
 import React, { useState } from "react";
 
-import useHistoryChat from "./hooks";
-
-// ── Types ────────────────────────────────────────────────
+import useHistoryChat, { type ChatSession } from "./hooks";
+import UserIcon from "../../assets/userIcon";
+import { formatDate } from "../../utils/date";
 
 type TabId = "history" | "explore" | "settings";
 
-interface HistoryItem {
-  id: string;
-  chatSessionId: string;
-  status: string;
-}
-
-
 const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: "history", label: "History", icon: <History size={20} /> },
-  { id: "settings", label: "Settings", icon: <Settings size={20} /> },
+  // { id: "settings", label: "Settings", icon: <Settings size={20} /> },
 ];
 
-// ── Sub-components ───────────────────────────────────────
-
-function HistoryCard({ item, onClick }: { item: HistoryItem; onClick: () => void }) {
+function HistoryCard({ item, onClick }: { item: ChatSession; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       className="flex w-full items-center gap-4 rounded-2xl bg-white px-4 py-4 text-left shadow-sm transition-colors hover:bg-slate-50"
     >
-      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${item.iconBg}`}>
+      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl`}>
         {/* 임의 아이콘 넣기 svg */}
-        <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="24" cy="24" r="24" fill="#14B8A6"/>
-          <circle cx="24" cy="18" r="7" fill="white"/>
-          <path d="M10 38 C10 28 16 24 24 24 C32 24 38 28 38 38 Z" fill="white"/>
-        </svg>
+        <UserIcon />
         
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm font-semibold text-slate-800">1{item.id}</span>
-          <span className="shrink-0 text-xs text-slate-400">2{item.id}</span>
+          <span className="truncate text-sm font-semibold text-slate-800">
+            {item.status} {" "}
+            <span
+              className={`inline-block h-2 w-2 rounded-full ${
+                item.status === "active" ? "bg-green-500" : "bg-gray-400"
+              } mr-2`}
+            ></span>
+          </span>
+          <span className="shrink-0 text-xs text-slate-400">{formatDate(item.createdat)}</span>
         </div>
-        <p className="mt-0.5 truncate text-sm text-slate-400">3{item.id}</p>
+        <p className="mt-0.5 truncate text-sm text-slate-400">{item.lastfrom}: {item.lastmessage}</p>
       </div>
     </button>
   );
@@ -57,6 +50,7 @@ export default function HistoryChat() {
   const [activeTab, setActiveTab] = useState<TabId>("history");
   const [query, setQuery] = useState("");
 
+  // TODO: add filter by search query
   const filtered = chatSessions;
 
   return (
@@ -66,7 +60,7 @@ export default function HistoryChat() {
         <button className="text-slate-700" aria-label="메뉴 열기">
           {/* <Menu size={22} /> */}
         </button>
-        <h1 className="text-lg font-bold text-blue-600">InsightBot</h1>
+        <h1 className="text-lg font-bold text-blue-600">고객센터 챗봇</h1>
         <div className="h-9 w-9 overflow-hidden rounded-full bg-slate-200">
           <img
             src="https://i.pravatar.cc/36"

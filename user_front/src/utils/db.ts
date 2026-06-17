@@ -6,8 +6,10 @@ const db = await PGlite.create('idb://customer-service-center', {
   extensions: { live }
 })
 
-await db.exec('CREATE EXTENSION IF NOT EXISTS pg_uuidv7;')
+// await db.exec('CREATE EXTENSION IF NOT EXISTS pg_uuidv7;')
 
+// pglite에서 camecase로 적용안됨
+// chatSessionId => chatsessionid으로 조회됨
 await db.exec(`
   CREATE TABLE IF NOT EXISTS chat (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),

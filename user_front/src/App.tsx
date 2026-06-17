@@ -8,8 +8,6 @@ import HistoryPage from "./pages/history"
 
 import './index.css';
 
-
-
 const App = () => {
   return (
     <PGliteProvider db={db}>

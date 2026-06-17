@@ -179,6 +179,7 @@ export class ChatService {
       from: chat.from,
       content: chat.content,
       mode: chat.mode,
+      createdAt: chat.createdAt,
     }));
   }
 
