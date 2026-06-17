@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { uuidv7 } from 'uuidv7';
 import { PrismaService } from 'src/db/prisma.service';
-import { ChatMode, From, Msg } from './dto/chat.dto';
+import { ChatMode, ChatSession, From, Msg } from './dto/chat.dto';
 import {
   MessageFrom as MessageFromPrisma,
   ChatMode as ChatModePrisma,
@@ -160,7 +160,10 @@ export class ChatService {
     }
   }
 
-  async getChatHistory(chatSessionId: string, lastId?: string): Promise<Msg[]> {
+  async getChatHistory(
+    chatSessionId: string,
+    lastId?: string,
+  ): Promise<{ chats: Msg[]; chatSession: ChatSession }> {
     const where = {
       chatSessionId,
       ...(lastId ? { id: { gt: lastId } } : {}),
@@ -170,18 +173,36 @@ export class ChatService {
       orderBy: { createdAt: 'asc' },
     });
 
+    const chatSession = await this.prisma.chatSession.findFirst({
+      where: { chatSessionId },
+    });
+    console.log(chatSession);
     if (!chats) {
-      return [];
+      return {
+        chats: [],
+        chatSession: {
+          chatSessionId: '',
+          status: '',
+          createdAt: new Date(),
+        },
+      };
     }
 
-    return chats.map((chat) => ({
-      id: chat.id,
-      chatSessionId: chat.chatSessionId,
-      from: chat.from,
-      content: chat.content,
-      mode: chat.mode,
-      createdAt: chat.createdAt,
-    }));
+    return {
+      chatSession: {
+        chatSessionId: chatSession?.chatSessionId ?? '',
+        status: chatSession?.status ?? '',
+        createdAt: chatSession?.createdAt ?? new Date(),
+      },
+      chats: chats.map((chat) => ({
+        id: chat.id,
+        chatSessionId: chat.chatSessionId,
+        from: chat.from as From,
+        content: chat.content,
+        mode: chat.mode as ChatMode,
+        createdAt: chat.createdAt,
+      })),
+    };
   }
 
   async getChatSessions(): Promise<any> {

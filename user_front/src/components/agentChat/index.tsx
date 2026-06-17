@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 import useAgentChat, { type Chat } from "./hooks";
-import { Menu, Plus, Send, Headphones } from "lucide-react";
+import { Menu, Plus, Send, Headphones, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChatFrom, ChatMode } from "../../utils/enum";
 import { formatDate } from "../../utils/date";
@@ -143,7 +143,8 @@ function AgentChat({ chatSessionId }: Props) {
       {/* Header */}
       <header className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
         <button className="text-slate-700" aria-label="메뉴 열기">
-          <Menu size={22} onClick={() => navigate('/')} />
+          {/* icon change menu to back arrow */}
+          <ArrowLeft size={22} onClick={() => navigate('/')} />
         </button>
         <h1 className="text-lg font-bold text-blue-600">고객센터 상담 센터({mode})</h1>
         <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-200">

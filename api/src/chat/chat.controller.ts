@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Query, Sse } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Observable } from 'rxjs/internal/Observable';
 import { MessageEvent } from '@nestjs/common';
-import { Msg } from './dto/chat.dto';
+import { ChatSession, Msg } from './dto/chat.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -12,7 +12,7 @@ export class ChatController {
   async getChatHistory(
     @Query('chatSessionId') chatSessionId: string,
     @Query('lastId') lastId?: string,
-  ): Promise<Msg[]> {
+  ): Promise<{ chats: Msg[]; chatSession: ChatSession }> {
     return this.chatService.getChatHistory(chatSessionId, lastId);
   }
 

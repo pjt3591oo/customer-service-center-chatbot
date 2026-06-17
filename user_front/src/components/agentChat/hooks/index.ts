@@ -71,22 +71,39 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
     });
 
     const data = await res.json();
-    console.log('Fetched chat history:', data);
-    data.forEach((chat: Chat) => {
-      saveChat({
-        id: chat.id,
-        chatSessionId: chat.chatSessionId,
-        from: chat.from,
-        content: chat.content,
-        mode: ChatMode.REALTIME,
-        createdat: chat.createdat,
+    console.log(data)
+    const { chats: responseChats, chatSession } = data as { chats: Chat[]; chatSession: { chatSessionId: string; status: string; createdAt: string } };
+    const isClosed = chatSession.status === 'closed';  
+  
+    if (isClosed) {
+      db.query(`
+        UPDATE chatSession
+        SET status = 'CLOSED', updatedAt = $1
+        WHERE chatSessionId = $2
+      `, [new Date(), chatSessionId]);
+    } else {
+      responseChats.forEach((chat: Chat) => {
+        saveChat({
+          id: chat.id,
+          chatSessionId: chat.chatSessionId,
+          from: chat.from,
+          content: chat.content,
+          mode: ChatMode.REALTIME,
+          createdat: chat.createdat,
+        });
       });
-    });
+    }
+
+    return isClosed
   }
 
   async function connectRealTimeChat() {
-    await fetchChatHistory();
+    const isClosed = await fetchChatHistory();
 
+    if (isClosed) {
+      return;
+    }
+    
     socketRef.current = io(`${WS_URL}/chat`, {
       transports: ["websocket"],
       query: { chatSessionId },

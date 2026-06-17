@@ -20,3 +20,9 @@ export interface Msg {
   mode: ChatModePrisma;
   createdAt: Date;
 }
+
+export interface ChatSession {
+  chatSessionId: string;
+  status: string;
+  createdAt: Date;
+}
