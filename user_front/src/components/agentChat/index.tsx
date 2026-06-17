@@ -102,6 +102,8 @@ function MessageBubble({ chat }: { chat: Chat }) {
           )}
           <p className="whitespace-pre-wrap">{chat.content}</p>
         </div>
+
+        <div className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-400 mt-2">{formatDate(chat?.createdat)}</div>
       </div>
     </div>
   );
