@@ -53,7 +53,6 @@ export class ChatGateway {
     const msg = this.generateMsgFromPayload(payload, From.USER);
 
     await this.chatService.addChat(payload.chatSessionId, [msg]);
-    console.log(payload.chatSessionId);
     this.server?.to(payload.chatSessionId).emit('message', msg); // 해당 채팅 세션 ID를 가진 클라이언트에게 메시지 전송
 
     // return { success: true };
@@ -83,6 +82,7 @@ export class ChatGateway {
       from,
       content: payload.msg,
       mode: ChatMode.REALTIME,
+      createdAt: new Date(),
     };
   }
 }

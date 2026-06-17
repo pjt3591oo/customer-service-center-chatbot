@@ -245,12 +245,17 @@ function MessageRow({ msg }: { msg: Chat }) {
 
 // ─── main component ───────────────────────────────────────────────────────────
 export default function ChatPage() {
-  const { sessions, activeSession, chats, onSelectChatSession, onSendMessage } = useChat();
+  const { sessions, activeSession, chats, onSelectChatSession, onSendMessage, onCloseChatSession } = useChat();
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [inputValue, setInputValue] = useState("");
 
   const session = sessions.find((s) => s.chatSessionId === activeSession?.chatSessionId)!;
+
+  const filteredSessions = sessions.filter((s) => {
+    if (filter === "all") return true;
+    return s.status === filter;
+  });
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -436,7 +441,7 @@ export default function ChatPage() {
 
           {/* sessions */}
           <div style={{ overflowY: "auto", flex: 1 }}>
-            {sessions.map((s) => (
+            {filteredSessions.map((s) => (
               <div
                 key={s.chatSessionId}
                 onClick={() => onSelectChatSession(s.chatSessionId)}
@@ -514,6 +519,20 @@ export default function ChatPage() {
                         ACTIVE
                       </span>
                     )}
+                    {session.status === 'closed' && (
+                      <span
+                        style={{
+                          fontSize: 10,
+                          background: "#F5F5F5",
+                          color: "#666",
+                          padding: "1px 7px",
+                          borderRadius: 999,
+                          fontWeight: 500,
+                        }}
+                      >
+                        CLOSED
+                      </span>
+                    )}
                   </div>
                   <div style={{ fontSize: 11, color: "#999", marginTop: 1 }}>
                     {session.chatSessionId}
@@ -556,7 +575,7 @@ export default function ChatPage() {
                   alignItems: "center",
                   gap: 5,
                 }}
-                onClick={() => {alert("기능 미구현")}}
+                onClick={() => onCloseChatSession(session.chatSessionId)}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />

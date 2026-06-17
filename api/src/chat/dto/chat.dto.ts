@@ -18,4 +18,5 @@ export interface Msg {
   from: MessageFrom;
   content: string;
   mode: ChatModePrisma;
+  createdAt: Date;
 }

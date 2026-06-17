@@ -152,6 +152,7 @@ export class ChatService {
       from: FromToMessageFrom[m.from],
       content: m.content,
       mode: ChatModeToPrisma[m.mode],
+      createdAt: new Date(),
     }));
 
     if (data.length > 0) {
@@ -195,5 +196,23 @@ export class ChatService {
       mode: 'REALTIME',
       createdAt: session.createdAt,
     }));
+  }
+
+  async closeChatSession(chatSessionId: string): Promise<void> {
+    await this.prisma.chatSession.updateMany({
+      where: { chatSessionId },
+      data: { status: 'closed' },
+    });
+
+    // 상담사와 채팅이 종료되었습니다 메시지 추가
+    await this.prisma.chat.create({
+      data: {
+        id: uuidv7(),
+        chatSessionId,
+        from: MessageFromPrisma.SYSTEM,
+        content: '상담사와 채팅이 종료되었습니다.',
+        mode: ChatModePrisma.REALTIME,
+      },
+    });
   }
 }

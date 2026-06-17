@@ -55,6 +55,7 @@ const useChat = () => {
     });
 
     socketRef.current.on('message', async (incoming: Chat) => {
+      console.log(incoming);
       setChats((prevChats) => [...prevChats, incoming]);
     });
   }
@@ -80,7 +81,28 @@ const useChat = () => {
     socketRef.current?.emit('message/admin', newChat);
   }
 
-  return {sessions, activeSession, chats, onSelectChatSession, onSendMessage};
+  const onCloseChatSession = async (chatSessionId: string) => {
+    await fetch(`${HTTP_URL}/chat/close?chatSessionId=${chatSessionId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Update local state
+    setSessions((prevSessions) =>
+      prevSessions.map((session) =>
+        session.chatSessionId === chatSessionId ? { ...session, status: 'closed' } : session
+      )
+    );
+
+    if (activeSession?.chatSessionId === chatSessionId) {
+      setActiveSession(null);
+      setChats([]);
+    }
+  }
+
+  return {sessions, activeSession, chats, onSelectChatSession, onSendMessage, onCloseChatSession};
 }
 
 export default useChat;

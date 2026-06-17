@@ -38,4 +38,12 @@ export class ChatController {
   async getChatSession(): Promise<any> {
     return this.chatService.getChatSessions();
   }
+
+  @Post('/close')
+  async closeChatSession(
+    @Query('chatSessionId') chatSessionId: string,
+  ): Promise<{ success: boolean }> {
+    await this.chatService.closeChatSession(chatSessionId);
+    return { success: true };
+  }
 }
