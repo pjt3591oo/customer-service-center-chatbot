@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
+import { ChatFrom, type From, type Mode } from "../../../utils/enum";
+import { HTTP_URL, WS_URL } from "../../../utils/endpoint";
 
 export interface ChatSession {
   id: string;
@@ -12,15 +14,10 @@ export interface ChatSession {
 export interface Chat {
   id?: number;
   chatSessionId: string;
-  from: 'USER' | 'BOT' | 'ADMIN' | 'SYSTEM';
+  from: From;
   content: string;
-  mode: "AGENT" | "REALTIME";
-}
-
-interface ReceiveMsg {
-  answer: string;
-  question: string;
-  section: string;
+  mode: Mode;
+  createdAt: string;
 }
 
 const useChat = () => {
@@ -32,7 +29,7 @@ const useChat = () => {
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:3000/chat/sessions')
+    fetch(`${HTTP_URL}/chat/sessions`)
       .then((response) => response.json())
       .then((data) => {console.log('Fetched sessions:', data); return data})
       .then((data) => setSessions(data));
@@ -45,7 +42,7 @@ const useChat = () => {
   }, [activeSession])
 
   const getHistoryAndConnect = async (chatSessionId: string) => {
-    const res = await fetch(`http://localhost:3000/chat/history?chatSessionId=${chatSessionId}`, {
+    const res = await fetch(`${HTTP_URL}/chat/history?chatSessionId=${chatSessionId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -55,7 +52,7 @@ const useChat = () => {
     console.log('Fetched chat history:', data);
     setChats(data);
 
-    socketRef.current = io(`http://127.0.0.1:3001/chat`, {
+    socketRef.current = io(`${WS_URL}/chat`, {
       transports: ["websocket"],
       query: { chatSessionId },
     });
@@ -82,7 +79,7 @@ const useChat = () => {
     
     const newChat = {
       chatSessionId: activeSession.chatSessionId,
-      from: 'ADMIN',
+      from: ChatFrom.ADMIN,
       msg: content,
     };
     console.log(newChat)

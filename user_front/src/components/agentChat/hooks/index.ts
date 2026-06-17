@@ -4,6 +4,7 @@ import { fetchSSE, type ReceiveMsg } from '../../../utils/sse';
 import io from "socket.io-client";
 import { uuidv7 } from 'uuidv7';
 import { ChatFrom, ChatMode, type From, type Mode } from '../../../utils/enum';
+import { HTTP_URL, WS_URL } from '../../../utils/endpoint';
 
 export interface Chat {
   id: string;
@@ -62,7 +63,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
   async function fetchChatHistory() {
     const lastChat = chats[chats.length - 1];
     const lastId = lastChat?.id ?? 0;
-    const res = await fetch(`http://localhost:3000/chat/history?chatSessionId=${chatSessionId}&lastId=${lastId}`, {
+    const res = await fetch(`${HTTP_URL}/chat/history?chatSessionId=${chatSessionId}&lastId=${lastId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -86,7 +87,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
   async function connectRealTimeChat() {
     await fetchChatHistory();
 
-    socketRef.current = io(`http://127.0.0.1:3001/chat`, {
+    socketRef.current = io(`${WS_URL}/chat`, {
       transports: ["websocket"],
       query: { chatSessionId },
     });
@@ -180,7 +181,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
         createdat: new Date().toISOString(),
       });
 
-      await fetch(`http://127.0.0.1:3000/chat/sync?chatSessionId=${chatSessionId}`, {
+      await fetch(`${HTTP_URL}/chat/sync?chatSessionId=${chatSessionId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(chats),

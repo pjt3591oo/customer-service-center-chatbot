@@ -1,108 +1,9 @@
 import { useState } from "react";
 import useChat, { type Chat } from "./hooks";
+import { ChatFrom } from "../../utils/enum";
+import { formatDate } from "../../utils/date";
 
-type SessionStatus = "active" | "pending" | "closed";
 type FilterType = "all" | "active" | "pending" | "closed";
-type MessageType = "bot" | "user" | "admin" | "diagnostic";
-
-interface Session {
-  id: string;
-  name: string;
-  initials: string;
-  preview: string;
-  time: string;
-  online: boolean;
-  avatarBg: string;
-  avatarColor: string;
-  status: SessionStatus;
-}
-
-interface Message {
-  id: string;
-  type: MessageType;
-  sender: string;
-  time: string;
-  content?: string;
-  diagnostic?: {
-    title: string;
-    body: string;
-    link: string;
-  };
-}
-
-const SESSIONS: Session[] = [
-  {
-    id: "1",
-    name: "Elena Rodriguez",
-    initials: "ER",
-    preview: "The API keeps returning a ...",
-    time: "2m ago",
-    online: true,
-    avatarBg: "#EBF3FC",
-    avatarColor: "#185FA5",
-    status: "active",
-  },
-  {
-    id: "2",
-    name: "Marcus Chen",
-    initials: "MC",
-    preview: "Thanks for the update on t...",
-    time: "1h ago",
-    online: false,
-    avatarBg: "#F1EFE8",
-    avatarColor: "#5F5E5A",
-    status: "active",
-  },
-  {
-    id: "3",
-    name: "Sarah Jenkins",
-    initials: "SJ",
-    preview: "Can we schedule a call for...",
-    time: "3h ago",
-    online: false,
-    avatarBg: "#FBEAF0",
-    avatarColor: "#993556",
-    status: "pending",
-  },
-];
-
-const MESSAGES: Message[] = [
-  {
-    id: "1",
-    type: "bot",
-    sender: "Support Bot",
-    time: "10:45 AM",
-    content:
-      "Hello Elena! I see you're having trouble with the API connection. Could you please provide the endpoint you're trying to reach?",
-  },
-  {
-    id: "2",
-    type: "user",
-    sender: "Elena Rodriguez",
-    time: "10:46 AM",
-    content:
-      "I'm trying to hit the /v2/sessions/analytics endpoint, but it keeps giving me a 403 Forbidden error. I've checked my API key twice.",
-  },
-  {
-    id: "3",
-    type: "diagnostic",
-    sender: "Support Bot",
-    time: "10:46 AM",
-    diagnostic: {
-      title: "System Diagnostics",
-      body: "I've detected a scope mismatch in your current API token. It lacks 'read:analytics' permissions.",
-      link: "View Token Permissions",
-    },
-  },
-  {
-    id: "4",
-    type: "admin",
-    sender: "Admin (You)",
-    time: "Just now",
-    content:
-      "Hi Elena, I'm jumping in here. I can manually elevate your token's scope for this endpoint. Give me just a second to update our records.",
-  },
-];
 
 const QUICK_ACTIONS = [
   "Grant Analytics Access",
@@ -181,7 +82,7 @@ function UserIcon() {
 }
 
 function MessageRow({ msg }: { msg: Chat }) {
-  if (msg.from === "USER") {
+  if (msg.from === ChatFrom.USER) {
     return (
      <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
         <UserIcon />
@@ -212,19 +113,23 @@ function MessageRow({ msg }: { msg: Chat }) {
               {msg.content}
             </div>
 
+
+          </div>
+          <div className="text-xs text-gray-400">
+            {formatDate(msg.createdAt)}
           </div>
         </div>
       </div>
     );
   }
 
-  if (msg.from === "ADMIN") {
+  if (msg.from === ChatFrom.ADMIN) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
         <div style={{ fontSize: 11, color: "#999" }}>
-          {"시간:"}
           <span style={{ color: "#185FA5", fontWeight: 500 }}>상담사</span>
         </div>
+        
         <div
           style={{
             background: "#185FA5",
@@ -239,11 +144,15 @@ function MessageRow({ msg }: { msg: Chat }) {
         >
           {msg.content}
         </div>
+
+        <div className="text-xs text-gray-400">
+          {formatDate(msg.createdAt)}
+        </div>
       </div>
     );
   }
 
-  if (msg.from === "BOT") {
+  if (msg.from === ChatFrom.BOT) {
     return (
       <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
         <BotIcon />
@@ -305,6 +214,9 @@ function MessageRow({ msg }: { msg: Chat }) {
               {/* {msg.diagnostic!.link} */}
             </div>
           </div>
+          <div className="text-xs text-gray-400">
+            {formatDate(msg.createdAt)}
+          </div>
         </div>
       </div>
     );
@@ -335,34 +247,13 @@ function MessageRow({ msg }: { msg: Chat }) {
 }
 
 // ─── main component ───────────────────────────────────────────────────────────
-
 export default function ChatPage() {
   const { sessions, activeSession, chats, onSelectChatSession, onSendMessage } = useChat();
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [inputValue, setInputValue] = useState("");
-  // const [messages, setMessages] = useState<Message[]>(MESSAGES);
 
   const session = sessions.find((s) => s.chatSessionId === activeSession?.chatSessionId)!;
-
-  const filteredSessions = SESSIONS.filter(
-    (s) => filter === "all" || s.status === filter
-  );
-
-  // function handleSend() {
-  //   if (!inputValue.trim()) return;
-  //   setMessages((prev) => [
-  //     ...prev,
-  //     {
-  //       id: String(Date.now()),
-  //       type: "admin",
-  //       sender: "Admin (You)",
-  //       time: "Just now",
-  //       content: inputValue.trim(),
-  //     },
-  //   ]);
-  //   setInputValue("");
-  // }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -630,7 +521,7 @@ export default function ChatPage() {
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ fontSize: 13, fontWeight: 500, color: "#111" }}>{session.chatSessionId.slice(30, 35)}</span>
-                    {session.mode === 'active' && (
+                    {session.status === 'active' && (
                       <span
                         style={{
                           fontSize: 10,
