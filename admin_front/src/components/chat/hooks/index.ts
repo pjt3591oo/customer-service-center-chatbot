@@ -77,9 +77,8 @@ const useChat = () => {
 
   const onSendMessage = async (content: string) => {
     console.log('Sending message:', content);
-    if (!activeSession) return;
+    if (!activeSession || activeSession.status !== 'active') return;
     if (!content.trim()) return;
-
     
     const newChat = {
       chatSessionId: activeSession.chatSessionId,

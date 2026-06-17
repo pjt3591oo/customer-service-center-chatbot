@@ -15,6 +15,15 @@ export interface Chat {
   createdat: string;
 }
 
+export interface IncomingChat {
+  id: string;
+  chatSessionId: string;
+  from: From;
+  content: string;
+  mode: Mode;
+  createdAt: string;
+}
+
 const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
   const db = usePGlite();
   const [msg, setMsg] = useState<string>('');
@@ -62,7 +71,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
 
   async function fetchChatHistory() {
     const lastChat = chats[chats.length - 1];
-    const lastId = lastChat?.id ?? 0;
+    const lastId = lastChat?.id ?? '';
     const res = await fetch(`${HTTP_URL}/chat/history?chatSessionId=${chatSessionId}&lastId=${lastId}`, {
       method: 'GET',
       headers: {
@@ -71,28 +80,27 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
     });
 
     const data = await res.json();
-    console.log(data)
+    
     const { chats: responseChats, chatSession } = data as { chats: Chat[]; chatSession: { chatSessionId: string; status: string; createdAt: string } };
-    const isClosed = chatSession.status === 'closed';  
-  
+    const isClosed = chatSession?.status === 'closed';  
+
     if (isClosed) {
       db.query(`
         UPDATE chatSession
         SET status = 'CLOSED', updatedAt = $1
         WHERE chatSessionId = $2
       `, [new Date(), chatSessionId]);
-    } else {
-      responseChats.forEach((chat: Chat) => {
-        saveChat({
-          id: chat.id,
-          chatSessionId: chat.chatSessionId,
-          from: chat.from,
-          content: chat.content,
-          mode: ChatMode.REALTIME,
-          createdat: chat.createdat,
-        });
-      });
     }
+    responseChats.forEach((chat: Chat) => {
+      saveChat({
+        id: chat.id,
+        chatSessionId: chat.chatSessionId,
+        from: chat.from,
+        content: chat.content,
+        mode: ChatMode.REALTIME,
+        createdat: chat.createdat,
+      });
+    });
 
     return isClosed
   }
@@ -109,14 +117,14 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
       query: { chatSessionId },
     });
 
-    socketRef.current.on('message', async (incoming: Chat) => {
+    socketRef.current.on('message', async (incoming: IncomingChat) => {
       await saveChat({
         id: uuidv7(),
         chatSessionId: incoming.chatSessionId,
         from: incoming.from,
         content: incoming.content,
         mode: ChatMode.REALTIME,
-        createdat: incoming.createdat,
+        createdat: incoming.createdAt,
       });
     });
 
@@ -138,7 +146,6 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
     const payload = { chatSessionId, msg };
 
     if (mode === "AGENT") {
-
       await saveChat({
         id: uuidv7(),
         chatSessionId,
