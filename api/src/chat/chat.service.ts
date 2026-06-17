@@ -5,7 +5,8 @@ import { Injectable } from '@nestjs/common';
 import { MessageEvent } from '@nestjs/common';
 import { Observable, Subscriber } from 'rxjs';
 import { QnaGeneratorService } from 'src/qna-generator/qna-generator.service';
-import fs from 'fs/promises';
+import * as fs from 'fs/promises';
+import { readdirSync } from 'fs';
 import path from 'path';
 import { uuidv7 } from 'uuidv7';
 import { PrismaService } from 'src/db/prisma.service';
@@ -83,20 +84,21 @@ export class ChatService {
       });
     } else {
       // TODO: 파일을 직접 읽는 방식은 임시방편
-      const res = await this.qnaGeneratorService.generateQnaCandidates(msg, [
-        path.join(process.cwd(), '../llmwiki/wiki/concepts/membership.md'),
-        path.join(
-          process.cwd(),
-          '../llmwiki/wiki/concepts/returns_exchange.md',
-        ),
-      ]);
+      const conceptsDir = path.join(process.cwd(), '../llmwiki/wiki/concepts');
+      const mdFiles = readdirSync(conceptsDir)
+        .filter((file: string) => file.endsWith('.md'))
+        .map((file) => path.join(conceptsDir, file));
+      const res = await this.qnaGeneratorService.generateQnaCandidates(
+        msg,
+        mdFiles,
+      );
       let content = '';
+
       for await (const item of res) {
         content += item.message?.content ?? '';
         subscriber.next({
           data: content,
         });
-        console.log(content);
       }
       console.log('Final generated content:', content);
 
