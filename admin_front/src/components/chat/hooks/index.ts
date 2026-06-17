@@ -31,12 +31,10 @@ const useChat = () => {
   useEffect(() => {
     fetch(`${HTTP_URL}/chat/sessions`)
       .then((response) => response.json())
-      .then((data) => {console.log('Fetched sessions:', data); return data})
       .then((data) => setSessions(data));
   }, []);
 
   useEffect(() => {
-
     // eslint-disable-next-line react-hooks/immutability
     getHistoryAndConnect(activeSession?.chatSessionId ?? '');
   }, [activeSession])
@@ -49,7 +47,6 @@ const useChat = () => {
       },
     });
     const data = await res.json();
-    console.log('Fetched chat history:', data);
     setChats(data);
 
     socketRef.current = io(`${WS_URL}/chat`, {
@@ -58,9 +55,6 @@ const useChat = () => {
     });
 
     socketRef.current.on('message', async (incoming: Chat) => {
-      console.log('Received real-time message:', incoming);
-
-      // Update local state with new message
       setChats((prevChats) => [...prevChats, incoming]);
     });
   }
@@ -82,7 +76,6 @@ const useChat = () => {
       from: ChatFrom.ADMIN,
       msg: content,
     };
-    console.log(newChat)
     // Save to backend
     socketRef.current?.emit('message/admin', newChat);
   }
