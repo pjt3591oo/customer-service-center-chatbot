@@ -3,19 +3,16 @@ import useChat, { type Chat } from "./hooks";
 import { ChatFrom } from "../../utils/enum";
 import { formatDate } from "../../utils/date";
 
-type FilterType = "all" | "active" | "pending" | "closed";
+type FilterType = "all" | "active" | "closed";
 
 const QUICK_ACTIONS = [
-  "Grant Analytics Access",
-  "Reset API Keys",
-  "Send Documentation",
-  "Escalate to Tech",
+  "Quick Action 0",
+  "Quick Action 1"
 ];
 
 const FILTER_OPTIONS: { label: string; value: FilterType }[] = [
   { label: "All", value: "all" },
   { label: "Active", value: "active" },
-  { label: "Pending", value: "pending" },
   { label: "Closed", value: "closed" },
 ];
 
@@ -349,25 +346,6 @@ export default function ChatPage() {
         ))}
 
         <div style={{ marginTop: "auto", padding: "14px" }}>
-          <button
-            style={{
-              width: "100%",
-              padding: "8px 0",
-              background: "#185FA5",
-              color: "#B5D4F4",
-              border: "none",
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 500,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 5,
-            }}
-          >
-            + New Bot Instance
-          </button>
           <div
             style={{
               display: "flex",
@@ -378,6 +356,7 @@ export default function ChatPage() {
               color: "#999",
               cursor: "pointer",
             }}
+            onClick={() => {alert("기능 미구현")}}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -557,6 +536,7 @@ export default function ChatPage() {
                   alignItems: "center",
                   gap: 5,
                 }}
+                onClick={() => {alert("기능 미구현")}}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
@@ -576,6 +556,7 @@ export default function ChatPage() {
                   alignItems: "center",
                   gap: 5,
                 }}
+                onClick={() => {alert("기능 미구현")}}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
@@ -663,9 +644,9 @@ export default function ChatPage() {
               background: "#fff",
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0, cursor: "pointer" }} aria-hidden="true">
+            {/* <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0, cursor: "pointer" }} aria-hidden="true">
               <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" />
-            </svg>
+            </svg> */}
             <input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -683,9 +664,9 @@ export default function ChatPage() {
                 fontFamily: "inherit",
               }}
             />
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0, cursor: "pointer" }} aria-hidden="true">
+            {/* <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0, cursor: "pointer" }} aria-hidden="true">
               <circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" />
-            </svg>
+            </svg> */}
             <button
               // onClick={handleSend}
               onClick={() => onSendMessage(inputValue)}
