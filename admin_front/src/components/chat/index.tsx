@@ -260,7 +260,8 @@ export default function ChatPage() {
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      // handleSend();
+      onSendMessage(inputValue);
+      setInputValue("");
     }
   }
 
@@ -405,7 +406,7 @@ export default function ChatPage() {
                 fontWeight: 500,
               }}
             >
-              24 Active
+              {sessions.filter((s) => s.status === 'active').length} Active
             </span>
           </div>
 
@@ -473,7 +474,34 @@ export default function ChatPage() {
                       marginTop: 2,
                     }}
                   >
-                    {s.chatSessionId.slice(0, 20)}...
+                    {s?.status === 'active' && (
+                      <span
+                        style={{
+                          fontSize: 10,
+                          background: "#EAF3DE",
+                          color: "#3B6D11",
+                          padding: "1px 7px",
+                          borderRadius: 999,
+                          fontWeight: 500,
+                        }}
+                      >
+                        ACTIVE
+                      </span>
+                    )}
+                    {s?.status === 'closed' && (
+                      <span
+                        style={{
+                          fontSize: 10,
+                          background: "#F5F5F5",
+                          color: "#666",
+                          padding: "1px 7px",
+                          borderRadius: 999,
+                          fontWeight: 500,
+                        }}
+                      >
+                        CLOSED
+                      </span>
+                    )}
                   </div>
                 </div>
                 <span style={{ fontSize: 11, color: "#bbb", flexShrink: 0 }}>{s.createdAt.slice(0, 10)}</span>

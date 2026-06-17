@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 import useAgentChat, { type Chat } from "./hooks";
-import { Menu, Plus, Send, Headphones, ArrowLeft } from "lucide-react";
+import { Plus, Send, Headphones, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ChatFrom, ChatMode } from "../../utils/enum";
 import { formatDate } from "../../utils/date";
@@ -130,12 +130,6 @@ function AgentChat({ chatSessionId }: Props) {
       icon: <Headphones size={18} />,
       onClick: () => onChangeMode("REALTIME"),
     },
-    // {
-    //   id: "summarize",
-    //   label: "Summarize Doc",
-    //   icon: <FileText size={18} />,
-    //   onClick: () => (void 0),
-    // },
   ];
 
   return (

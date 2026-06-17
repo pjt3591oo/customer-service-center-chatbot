@@ -47,17 +47,26 @@ const useChat = () => {
       },
     });
     const data = await res.json();
-    setChats(data);
+    const { chats: responseChats, chatSession } = data as { chats: Chat[]; chatSession: { chatSessionId: string; status: string; createdAt: string } };
 
-    socketRef.current = io(`${WS_URL}/chat`, {
-      transports: ["websocket"],
-      query: { chatSessionId },
-    });
+    const isClosed = chatSession.status === 'closed';
 
-    socketRef.current.on('message', async (incoming: Chat) => {
-      console.log(incoming);
-      setChats((prevChats) => [...prevChats, incoming]);
-    });
+    if (isClosed) {
+      return
+    } else {
+      setChats(responseChats);
+      
+      socketRef.current = io(`${WS_URL}/chat`, {
+        transports: ["websocket"],
+        query: { chatSessionId },
+      });
+  
+      socketRef.current.on('message', async (incoming: Chat) => {
+        console.log(incoming);
+        setChats((prevChats) => [...prevChats, incoming]);
+      });
+    }
+
   }
 
 
