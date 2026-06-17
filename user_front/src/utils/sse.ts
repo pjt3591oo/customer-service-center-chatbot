@@ -2,7 +2,14 @@ interface Payload {
   msg: string;
   chatSessionId: string;
 }
-export const fetchSSE = (payload: Payload, cb: (data: any) => void) => {
+
+export interface ReceiveMsg {
+  answer: string;
+  question: string;
+  section: string;
+}
+
+export const fetchSSE = (payload: Payload, cb: (data: { qna_candidates: ReceiveMsg[] } | null) => void) => {
     const eventSource = new EventSource(`http://localhost:3000/chat/agent?msg=${payload.msg}&chatSessionId=${payload.chatSessionId}`); // SSE 엔드포인트 URL
 
     eventSource.onopen = () => {

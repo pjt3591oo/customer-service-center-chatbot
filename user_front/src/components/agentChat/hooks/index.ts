@@ -1,32 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePGlite, useLiveQuery } from '@electric-sql/pglite-react';
-import { fetchSSE } from '../../../utils/sse';
+import { fetchSSE, type ReceiveMsg } from '../../../utils/sse';
 import io from "socket.io-client";
 import { uuidv7 } from 'uuidv7';
+import { ChatFrom, ChatMode, type From, type Mode } from '../../../utils/enum';
 
 export interface Chat {
   id: string;
   chatSessionId: string;
-  from: 'USER' | 'BOT' | 'ADMIN' | 'SYSTEM';
+  from: From;
   content: string;
-  mode: "AGENT" | "REALTIME";
-}
-
-interface ReceiveMsg {
-  answer: string;
-  question: string;
-  section: string;
+  mode: Mode;
+  createdat: string;
 }
 
 const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
   const db = usePGlite();
   const [msg, setMsg] = useState<string>('');
-  // const [mode, setMode] = useState<"AGENT" | "REALTIME">("AGENT");
+
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
   // ── 현재 세션 메시지 실시간 조회 ──────────────────────
   const result = useLiveQuery<Chat>(`
-    SELECT id, chatSessionId, "from", content, mode
+    SELECT id, chatSessionId, "from", content, mode, createdAt
     FROM chat
     WHERE chatSessionId = $1
     ORDER BY id ASC
@@ -36,26 +32,23 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
     SELECT mode FROM chatSession WHERE chatSessionId = $1
   `, [chatSessionId])?.rows[0]?.mode ?? 'AGENT';
 
-
-  useEffect(() => {
-    if (mode === "REALTIME") {
-      // TODO: result.rows의 마지막 메시지를 기준으로 추가된 메시지 받아오기
-    }
-  }, [mode])
-
   const chats: Chat[] = result?.rows ?? [];
 
   // ── 메시지 저장 헬퍼 ──────────────────────────────────
   const saveChat = async (chat: Chat) => {
     await db.query(`
-      INSERT INTO chat (id, chatSessionId, "from", content, mode)
-      VALUES ($1, $2, $3, $4, $5)
-    `, [chat.id, chat.chatSessionId, chat.from, chat.content, chat.mode]);
+      INSERT INTO chat (id, chatSessionId, "from", content, mode, createdAt)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `, [chat.id, chat.chatSessionId, chat.from, chat.content, chat.mode, chat.createdat]);
   };
+
+  useEffect(() => {
+    console.log(result?.rows)
+  }, [result?.rows])
 
   // ── REALTIME 모드 전환 ────────────────────────────────
   useEffect(() => {
-    if (mode === "AGENT") return;
+    if (mode === ChatMode.AGENT) return;
 
     // eslint-disable-next-line react-hooks/immutability
     connectRealTimeChat();
@@ -66,8 +59,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
     };
   }, [mode]);
 
-  async function connectRealTimeChat() {
-
+  async function fetchChatHistory() {
     const lastChat = chats[chats.length - 1];
     const lastId = lastChat?.id ?? 0;
     const res = await fetch(`http://localhost:3000/chat/history?chatSessionId=${chatSessionId}&lastId=${lastId}`, {
@@ -85,9 +77,14 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
         chatSessionId: chat.chatSessionId,
         from: chat.from,
         content: chat.content,
-        mode: "REALTIME",
+        mode: ChatMode.REALTIME,
+        createdat: chat.createdat,
       });
     });
+  }
+
+  async function connectRealTimeChat() {
+    await fetchChatHistory();
 
     socketRef.current = io(`http://127.0.0.1:3001/chat`, {
       transports: ["websocket"],
@@ -100,16 +97,18 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
         chatSessionId: incoming.chatSessionId,
         from: incoming.from,
         content: incoming.content,
-        mode: "REALTIME",
+        mode: ChatMode.REALTIME,
+        createdat: incoming.createdat,
       });
     });
 
     await saveChat({
       id: uuidv7(),
       chatSessionId,
-      from: "SYSTEM",
+      from: ChatFrom.SYSTEM,
       content: "상담원과 연결되었습니다.",
-      mode: "REALTIME",
+      mode: ChatMode.REALTIME,
+      createdat: new Date().toISOString(),  
     });
 
   }
@@ -118,25 +117,25 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
   const onSendMessage = async () => {
     if (!msg.trim()) return;
 
+    const payload = { chatSessionId, msg };
+
     if (mode === "AGENT") {
-      const payload = { msg, chatSessionId };
 
       await saveChat({
         id: uuidv7(),
         chatSessionId,
-        from: 'USER',
+        from: ChatFrom.USER,
         content: msg,
-        mode: "AGENT",
+        mode: ChatMode.AGENT,
+        createdat: new Date().toISOString(),
       });
 
-      setMsg('');
       fetchSSE(payload, receiveMessage);
-
-    } else if (mode === "REALTIME") {
-      socketRef.current?.emit('message/user', { chatSessionId, msg });
-
-      setMsg('');
+    } else if (mode === ChatMode.REALTIME) {
+      socketRef.current?.emit('message/user', payload);
     }
+
+    setMsg('');
   };
 
   // ── SSE 응답 수신 ─────────────────────────────────────
@@ -149,9 +148,10 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
       await saveChat({
         id: uuidv7(),
         chatSessionId,
-        from: 'BOT',
+        from: ChatFrom.BOT,
         content: candidate.answer,
-        mode: "AGENT",
+        mode: ChatMode.AGENT,
+        createdat: new Date().toISOString(),
       });
     }
   };
@@ -160,21 +160,24 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
     setMsg(e.target.value);
   };
 
-  const onChangeMode = async (newMode: "AGENT" | "REALTIME") => {
+  const onChangeMode = async (newMode: Mode) => {
     // setMode(newMode);
     db.query(`
-      UPDATE chatSession
-      SET mode = $1, updatedAt = CURRENT_TIMESTAMP
-      WHERE chatSessionId = $2
-    `, [newMode, chatSessionId]);
+      UPDATE 
+        chatSession
+      SET 
+        mode = $1, updatedAt = $2
+      WHERE chatSessionId = $3
+    `, [newMode, new Date(), chatSessionId]);
 
-    if (newMode === "REALTIME") {
+    if (newMode === ChatMode.REALTIME) {
       await saveChat({
         id: uuidv7(),
         chatSessionId,
-        from: "SYSTEM",
+        from: ChatFrom.SYSTEM,
         content: "상담원과 연결중입니다.",
-        mode: "REALTIME",
+        mode: ChatMode.REALTIME,
+        createdat: new Date().toISOString(),
       });
 
       await fetch(`http://127.0.0.1:3000/chat/sync?chatSessionId=${chatSessionId}`, {

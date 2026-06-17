@@ -1,8 +1,10 @@
 import { useRef, useEffect } from "react";
 import useAgentChat, { type Chat } from "./hooks";
-import { Menu, Plus, Send, FileText, Headphones } from "lucide-react";
+import { Menu, Plus, Send, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
- 
+import { ChatFrom, ChatMode } from "../../utils/enum";
+import { formatDate } from "../../utils/date";
+
 interface Props {
   chatSessionId: string;
 }
@@ -15,7 +17,7 @@ interface QuickAction {
 }
 
 function Avatar({ from }: { from: Chat["from"] }) {
-  if (from === "BOT") {
+  if (from === ChatFrom.BOT) {
     return (
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -30,7 +32,7 @@ function Avatar({ from }: { from: Chat["from"] }) {
     );
   }
  
-  if (from === "ADMIN") {
+  if (from === ChatFrom.ADMIN) {
     return (
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -67,8 +69,8 @@ function Avatar({ from }: { from: Chat["from"] }) {
 
 
 function MessageBubble({ chat }: { chat: Chat }) {
-  const isUser = chat.from === "USER";
-  const isSystem = chat.from === "SYSTEM";
+  const isUser = chat.from === ChatFrom.USER;
+  const isSystem = chat.from === ChatFrom.SYSTEM;
 
   if (isSystem) {
     return (
@@ -76,6 +78,7 @@ function MessageBubble({ chat }: { chat: Chat }) {
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-400">
           {chat.content}
         </span>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-400">{formatDate(chat?.createdat)}</span>
       </div>
     );
   }
@@ -89,12 +92,12 @@ function MessageBubble({ chat }: { chat: Chat }) {
           className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isUser
               ? "rounded-tr-sm bg-blue-600 text-white"
-              : chat.from === "ADMIN"
-              ? "rounded-tl-sm bg-amber-50 text-slate-800 border border-amber-200"
-              : "rounded-tl-sm bg-blue-50 text-slate-800"
+              : chat.from === ChatFrom.ADMIN
+                ? "rounded-tl-sm bg-amber-50 text-slate-800 border border-amber-200"
+                : "rounded-tl-sm bg-blue-50 text-slate-800"
           }`}
         >
-          {chat.from === "ADMIN" && (
+          {chat.from === ChatFrom.ADMIN && (
             <div className="mb-1 text-xs font-semibold text-amber-600">관리자</div>
           )}
           <p className="whitespace-pre-wrap">{chat.content}</p>
@@ -125,12 +128,12 @@ function AgentChat({ chatSessionId }: Props) {
       icon: <Headphones size={18} />,
       onClick: () => onChangeMode("REALTIME"),
     },
-    {
-      id: "summarize",
-      label: "Summarize Doc",
-      icon: <FileText size={18} />,
-      onClick: () => (void 0),
-    },
+    // {
+    //   id: "summarize",
+    //   label: "Summarize Doc",
+    //   icon: <FileText size={18} />,
+    //   onClick: () => (void 0),
+    // },
   ];
 
   return (
@@ -142,7 +145,7 @@ function AgentChat({ chatSessionId }: Props) {
         </button>
         <h1 className="text-lg font-bold text-blue-600">고객센터 상담 센터({mode})</h1>
         <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-200">
-          <Avatar from="ADMIN" />
+          <Avatar from={ChatFrom.ADMIN} />
         </div>
       </header>
  
@@ -153,7 +156,7 @@ function AgentChat({ chatSessionId }: Props) {
         ))}
       </div>
  
-      {mode === "AGENT" && (
+      {mode === ChatMode.AGENT && (
         <div className="flex gap-2 border-t border-slate-100 bg-white px-4 py-3">
           {QUICK_ACTIONS.map((action) => (
             <button

@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { usePGlite, useLiveQuery } from "@electric-sql/pglite-react"
 import { uuidv7 } from "uuidv7";
 import { useNavigate } from "react-router";
@@ -38,11 +37,6 @@ const useHistoryChat = () => {
   `);
   const navigate = useNavigate();
 
-
-  useEffect(() => {
-    console.log('Chat sessions updated:', chatSessions);
-  }, [chatSessions?.rows])
-
   const onNewChatSession = async () => {
     console.log('Creating new chat session');
     const chatSessionId = uuidv7();
@@ -63,7 +57,6 @@ const useHistoryChat = () => {
   }
 
   const onSelectChatSession = (chatSessionId: string) => {
-    console.log('Selected chat session:', chatSessionId); 
     navigate(`/chat/${chatSessionId}`);
   }
 
