@@ -78,7 +78,7 @@ export class ChatService {
       chatSessionId,
     );
 
-    const similarQna = await this.qnaGeneratorService.findSimilar(msg, 0.2);
+    const similarQna = await this.qnaGeneratorService.findSimilar(msg, 0.8);
     console.log('Similar QnA from cache:', similarQna);
 
     // cache hit

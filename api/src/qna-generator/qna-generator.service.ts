@@ -106,6 +106,7 @@ response format: xml
     }
   }
 
+  // threshold 1에 가까울수록 유사도가 높음
   async findSimilar(
     question: string,
     threshold: number,
@@ -124,9 +125,8 @@ response format: xml
       ORDER BY embedding <=> ${vectorLiteral}::vector
       LIMIT 1
     `;
-
     const top = rows[0];
-    if (!top || top.similarity > threshold) {
+    if (!top || top.similarity < threshold) {
       return null;
     }
 
