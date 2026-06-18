@@ -2,6 +2,7 @@ import json, ollama, os, pprint
 from psycopg2.extras import execute_values
 from prompt import QNA_GENERATION_PROMPT, QNA_QUESTION_SYSTEM_PROMPT
 from pg import get_connection
+from bs4 import BeautifulSoup
 
 EMBEDDING_MODEL = "nomic-embed-text"
 QNA_GENERATE_MODEL = "qwen2.5-coder:7b"
@@ -145,9 +146,50 @@ def search_similar_questions(user_prompt: str, top_k: int = 1, threshold: float 
 
     return rows
 
-def user_prompt_to_qna_candidates(user_prompt: str, reference_docs_path: list[str]) -> list[dict]:
+def user_prompt_to_qna_candidates(
+  user_prompt: str, 
+  reference_docs_path: list[str],
+  concept_docs: list[str]
+) -> list[dict]:
     # split user prompt and system prompt 
-    system_prompt = QNA_QUESTION_SYSTEM_PROMPT(reference_docs_path)
+    system_prompt = QNA_QUESTION_SYSTEM_PROMPT(reference_docs_path, concept_docs)
+
     user_prompt = f"User Question: {user_prompt}"
-    response = ollama.chat(model=QNA_QUESTION_MODEL, messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}])
-    return response["message"]["content"]
+    response = ollama.chat(
+        model=QNA_QUESTION_MODEL, 
+        messages=[
+          {
+            "role": "system", 
+            "content": system_prompt
+          }, 
+          {
+            "role": "user", 
+            "content": user_prompt
+          }
+        ],
+        # stop=None,
+        # format="json",
+        stream=True
+      )
+    content = ""
+    for chunk in response:
+      if "message" in chunk and "content" in chunk["message"]:
+          # print(chunk["message"]["content"], end="", flush=True)
+          content += chunk["message"]["content"]
+          soup = BeautifulSoup(
+              content.replace('```xml', '').replace('```', ''), 
+              "lxml"
+          )
+          answer = soup.find("answer")
+          section = soup.find("section")
+
+          print('' + '-'*50)
+          if answer:
+            print(answer.text)
+          if section:
+            print(section.text)
+
+    return {
+        "answer": answer.text if answer else None,
+        "section": section.text if section else None,
+    }

@@ -17,22 +17,29 @@ QNA_GENERATION_PROMPT = """다음은 고객센터 지식베이스의 개념(conc
     {{"question": "...", "answer": "...", "section": "관련 섹션명"}}
   ]
 }}
+
+# 참고: ```xml```, ```json```와 같은 내용은 포함시키지 않는다.
 """
 
-def QNA_QUESTION_SYSTEM_PROMPT(reference_docs_path: str) -> str:
+def QNA_QUESTION_SYSTEM_PROMPT(
+    reference_docs_path: str,
+    concept_docs: list[str]
+) -> str:
+  reference_docs = ''
+
+  for i, doc in enumerate(concept_docs):
+    doc_path =reference_docs_path[i]
+    concept = doc
+    reference_docs += f"Document {i+1} (Path: {doc_path}):\n{concept}\n\n"
+
   return f""" 
    너는 고객센터 챗봇의 질문 응답 생성기야. 사용자가 질문을 하면, 지식 베이스에서 가장 유사한 질문을 찾아서 해당 답변을 제공하려고 해. 만약 유사한 질문이 없다면, 주어진 참고 문서를 바탕으로 가장 유사한 질문과 그에 대한 답변을 생성해줘.  
     답변을 위해 reference_docs_path에 있는 문서들을 활용할 수 있어. 문서들은 마크다운 형식으로 되어 있고, 각 문서는 여러 섹션으로 나뉘어 있을 수 있어. 질문과 답변을 생성할 때, 해당 질문이 발견된 섹션의 이름도 함께 제공해줘.
     그리고 모든 질문과 답변은 고객센터 챗봇에서 사용될 것이기 때문에, 고객이 이해하기 쉬운 언어로 작성해줘. 
 
-    reference documents: {reference_docs_path}
+    reference documents: {reference_docs}
 
-    response format:
-{{  "qna_candidates": [
-    {{
-        "question": "similar question 1",
-        "answer": "corresponding answer 1",
-        "section": "the section where the question is found (optional)"
-    }}
-]}}
+    response format: xml
+    <answer> 질문에 대한 답변 (본문에서 정확히 찾아서 작성, 추측 금지) </answer>
+    <section> 질문과 답변이 발견된 섹션 이름 (없으면 null) </section>
 """
