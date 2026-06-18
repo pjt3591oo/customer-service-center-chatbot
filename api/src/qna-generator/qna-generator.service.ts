@@ -126,7 +126,7 @@ response format: xml
     `;
 
     const top = rows[0];
-    if (!top || top.similarity < threshold) {
+    if (!top || top.similarity > threshold) {
       return null;
     }
 
