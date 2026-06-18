@@ -8,27 +8,26 @@ const db = await PGlite.create('idb://customer-service-center', {
 
 // await db.exec('CREATE EXTENSION IF NOT EXISTS pg_uuidv7;')
 
-// pglite에서 camecase로 적용안됨
-// chatSessionId => chatsessionid으로 조회됨
+// postgres에서 camelCasse를 적용하기 위해선 ""을 감싸야 한다. 그렇지 않을경우 모두 소문자로 변환되어 저장됨
 await db.exec(`
   CREATE TABLE IF NOT EXISTS chat (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    chatSessionId TEXT NOT NULL,
+    "chatSessionId" TEXT NOT NULL,
     "from"       TEXT NOT NULL,
-    content      TEXT NOT NULL,
-    mode         TEXT NOT NULL,
-    createdAt    TIMESTAMP DEFAULT NOW()
+    "content"      TEXT NOT NULL,
+    "mode"         TEXT NOT NULL,
+    "createdAt"    TIMESTAMP DEFAULT NOW()
   );
 `);
 
 await db.exec(`
-  CREATE TABLE IF NOT EXISTS chatSession (
+  CREATE TABLE IF NOT EXISTS "chatSession" (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    chatSessionId TEXT,
-    status TEXT,
-    mode TEXT,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    "chatSessionId" TEXT,
+    "status" TEXT,
+    "mode" TEXT,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `)
 

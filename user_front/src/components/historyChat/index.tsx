@@ -37,7 +37,7 @@ function HistoryCard({ item, onClick }: { item: ChatSession; onClick: () => void
               } mr-2`}
             ></span>
           </span>
-          <span className="shrink-0 text-xs text-slate-400">{formatDate(item.createdat)}</span>
+          <span className="shrink-0 text-xs text-slate-400">{formatDate(item.createdAt)}</span>
         </div>
         <p className="mt-0.5 truncate text-sm text-slate-400">{item.lastfrom}: {item.lastmessage}</p>
       </div>
@@ -96,7 +96,7 @@ export default function HistoryChat() {
               <HistoryCard
                 key={item.id}
                 item={item}
-                onClick={() => onSelectChatSession?.(item.chatsessionid)}
+                onClick={() => onSelectChatSession?.(item.chatSessionId)}
               />
             ))
           ) : (

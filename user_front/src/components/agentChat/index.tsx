@@ -78,7 +78,7 @@ function MessageBubble({ chat }: { chat: Chat }) {
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-400">
           {chat.content}
         </span>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-400">{formatDate(chat?.createdat)}</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-400">{formatDate(chat?.createdAt)}</span>
       </div>
     );
   }
@@ -103,7 +103,7 @@ function MessageBubble({ chat }: { chat: Chat }) {
           <p className="whitespace-pre-wrap">{chat.content}</p>
         </div>
 
-        <div className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-400 mt-2">{formatDate(chat?.createdat)}</div>
+        <div className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-400 mt-2">{formatDate(chat?.createdAt)}</div>
       </div>
     </div>
   );

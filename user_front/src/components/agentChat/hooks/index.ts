@@ -13,7 +13,7 @@ export interface Chat {
   from: From;
   content: string;
   mode: Mode;
-  createdat: string;
+  createdAt: string;
 }
 
 export interface IncomingChat {
@@ -33,14 +33,14 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
 
   // ── 현재 세션 메시지 실시간 조회 ──────────────────────
   const result = useLiveQuery<Chat>(`
-    SELECT id, chatSessionId, "from", content, mode, createdAt
+    SELECT id, "chatSessionId", "from", content, mode, "createdAt"
     FROM chat
-    WHERE chatSessionId = $1
+    WHERE "chatSessionId" = $1
     ORDER BY id ASC
   `, [chatSessionId]);
 
   const mode = useLiveQuery<{ mode: "AGENT" | "REALTIME" }>(`
-    SELECT mode FROM chatSession WHERE chatSessionId = $1
+    SELECT mode FROM "chatSession" WHERE "chatSessionId" = $1
   `, [chatSessionId])?.rows[0]?.mode ?? 'AGENT';
 
   const chats: Chat[] = result?.rows ?? [];
@@ -48,9 +48,9 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
   // ── 메시지 저장 헬퍼 ──────────────────────────────────
   const saveChat = async (chat: Chat) => {
     await db.query(`
-      INSERT INTO chat (id, chatSessionId, "from", content, mode, createdAt)
+      INSERT INTO chat (id, "chatSessionId", "from", content, mode, "createdAt")
       VALUES ($1, $2, $3, $4, $5, $6)
-    `, [chat.id, chat.chatSessionId, chat.from, chat.content, chat.mode, chat.createdat]);
+    `, [chat.id, chat.chatSessionId, chat.from, chat.content, chat.mode, chat.createdAt]);
   };
 
   useEffect(() => {
@@ -87,9 +87,9 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
 
     if (isClosed) {
       db.query(`
-        UPDATE chatSession
-        SET status = 'CLOSED', updatedAt = $1
-        WHERE chatSessionId = $2
+        UPDATE "chatSession"
+        SET status = 'CLOSED', "updatedAt" = $1
+        WHERE "chatSessionId" = $2
       `, [new Date(), chatSessionId]);
     }
     responseChats.forEach((chat: Chat) => {
@@ -99,7 +99,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
         from: chat.from,
         content: chat.content,
         mode: ChatMode.REALTIME,
-        createdat: chat.createdat,
+        createdAt: chat.createdAt,
       });
     });
 
@@ -125,7 +125,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
         from: incoming.from,
         content: incoming.content,
         mode: ChatMode.REALTIME,
-        createdat: incoming.createdAt,
+        createdAt: incoming.createdAt,
       });
     });
 
@@ -135,7 +135,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
       from: ChatFrom.SYSTEM,
       content: "상담원과 연결되었습니다.",
       mode: ChatMode.REALTIME,
-      createdat: new Date().toISOString(),  
+      createdAt: new Date().toISOString(),  
     });
 
   }
@@ -153,7 +153,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
         from: ChatFrom.USER,
         content: msg,
         mode: ChatMode.AGENT,
-        createdat: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       });
 
       fetchSSE(payload, receiveMessage);
@@ -188,7 +188,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
         from: ChatFrom.BOT,
         content: answer,
         mode: ChatMode.AGENT,
-        createdat: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       });
     }
   };
@@ -201,10 +201,10 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
     // setMode(newMode);
     db.query(`
       UPDATE 
-        chatSession
+        "chatSession"
       SET 
-        mode = $1, updatedAt = $2
-      WHERE chatSessionId = $3
+        mode = $1, "updatedAt" = $2
+      WHERE "chatSessionId" = $3
     `, [newMode, new Date(), chatSessionId]);
 
     if (newMode === ChatMode.REALTIME) {
@@ -214,7 +214,7 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
         from: ChatFrom.SYSTEM,
         content: "상담원과 연결중입니다.",
         mode: ChatMode.REALTIME,
-        createdat: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       });
 
       await fetch(`${HTTP_URL}/chat/sync?chatSessionId=${chatSessionId}`, {
