@@ -153,7 +153,6 @@ def user_prompt_to_qna_candidates(
 ) -> list[dict]:
     # split user prompt and system prompt 
     system_prompt = QNA_QUESTION_SYSTEM_PROMPT(reference_docs_path, concept_docs)
-
     user_prompt = f"User Question: {user_prompt}"
     response = ollama.chat(
         model=QNA_QUESTION_MODEL, 
@@ -167,8 +166,6 @@ def user_prompt_to_qna_candidates(
             "content": user_prompt
           }
         ],
-        # stop=None,
-        # format="json",
         stream=True
       )
     content = ""
