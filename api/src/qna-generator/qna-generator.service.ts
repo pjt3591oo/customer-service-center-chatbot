@@ -67,21 +67,9 @@ export class QnaGeneratorService {
 참고 문서:
 ${referenceDocsContent}
 
-response format (JSON만 응답, 다른 설명 없이):
-{
-  "qna_candidates": [
-    {
-      "question": "similar question 1",
-      "answer": "corresponding answer 1",
-      "section": "the section where the question is found (optional)"
-    }
-  ]
-}
-
-# 절대 금지 사항
-- 전체 응답을 { ... } 로 감싸지 말 것
-- "plain_text", "answer_text" 등의 키를 첫 번째 부분에 사용하지 말 것
-- 1번째 부분과 2번째 부분 사이에는 정확히 빈 줄(\n\n) 하나만 둘 것
+response format: xml
+<answer> 질문에 대한 답변 (본문에서 정확히 찾아서 작성, 추측 금지) </answer>
+<section> 질문과 답변이 발견된 섹션 이름 (없으면 null) </section>
 `.trim();
   }
 
@@ -102,7 +90,7 @@ response format (JSON만 응답, 다른 설명 없이):
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `User Question: ${userPrompt}` },
       ],
-      format: 'json', // JSON 모드 강제 (코드블록 래핑 방지)
+      // format: 'json', // JSON 모드 강제 (코드블록 래핑 방지)
       stream: true,
     });
 

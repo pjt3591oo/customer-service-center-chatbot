@@ -16,6 +16,12 @@ import {
   ChatMode as ChatModePrisma,
   Chat,
 } from '@prisma/client';
+import { XMLParser } from 'fast-xml-parser';
+
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+});
 
 interface ChatResponse {
   qna_candidates?: {
@@ -78,8 +84,16 @@ export class ChatService {
     // cache hit
     if (similarQna) {
       subscriber.next({
+        // data: {
+        //   answer: similarQna.answer,
+        //   question: msg,
+        // },
         data: {
-          qna_candidates: [similarQna],
+          content: `
+            <answer>${similarQna.answer}</answer>
+            <question>${similarQna.question}</question>
+          `,
+          id: uuidv7(),
         },
       });
     } else {
@@ -93,11 +107,14 @@ export class ChatService {
         mdFiles,
       );
       let content = '';
-
+      const chatId = uuidv7();
       for await (const item of res) {
         content += item.message?.content ?? '';
         subscriber.next({
-          data: content,
+          data: {
+            content,
+            id: chatId,
+          },
         });
       }
       console.log('Final generated content:', content);
@@ -107,15 +124,18 @@ export class ChatService {
         path.join(process.cwd(), '../qna_generator/qna_candidates/.version'),
         'utf-8',
       );
-      const parsedContent = JSON.parse(content) as ChatResponse;
-      for (const candidate of parsedContent.qna_candidates ?? []) {
-        await this.qnaGeneratorService.saveQnaCache({
-          question: candidate.question,
-          answer: candidate.answer,
-          section: candidate.section,
-          version: parseInt(version, 10),
-        });
-      }
+      const parsedContent = parser.parse(content);
+      const answer = parsedContent.answer ?? '';
+      const section = parsedContent.section ?? '';
+
+      await this.qnaGeneratorService.saveQnaCache({
+        question: msg,
+        answer: answer,
+        section: section,
+        version: parseInt(version, 10),
+      });
+      // for (const candidate of parsedContent.qna_candidates ?? []) {
+      // }
     }
 
     subscriber.complete();

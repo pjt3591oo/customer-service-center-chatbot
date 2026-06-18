@@ -9,7 +9,7 @@ export interface ReceiveMsg {
   section: string;
 }
 
-export const fetchSSE = (payload: Payload, cb: (data: { qna_candidates: ReceiveMsg[] } | null) => void) => {
+export const fetchSSE = (payload: Payload, cb: (data: {id: string, content: string}) => void) => {
     const eventSource = new EventSource(`http://localhost:3000/chat/agent?msg=${payload.msg}&chatSessionId=${payload.chatSessionId}`); // SSE 엔드포인트 URL
 
     eventSource.onopen = () => {
@@ -18,8 +18,8 @@ export const fetchSSE = (payload: Payload, cb: (data: { qna_candidates: ReceiveM
 
     eventSource.onmessage = async (e) => {
       const res = await e.data;
-      // const parsedData = JSON.parse(res);
-      cb(res);
+      const parsedData = JSON.parse(res);
+      cb(parsedData);
       // 받아오는 data로 할 일
     };
 

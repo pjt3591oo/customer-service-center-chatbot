@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePGlite, useLiveQuery } from '@electric-sql/pglite-react';
-import { fetchSSE, type ReceiveMsg } from '../../../utils/sse';
+import { fetchSSE } from '../../../utils/sse';
 import io from "socket.io-client";
 import { uuidv7 } from 'uuidv7';
 import { ChatFrom, ChatMode, type From, type Mode } from '../../../utils/enum';
 import { HTTP_URL, WS_URL } from '../../../utils/endpoint';
+import { extractPartialXml } from '../../../utils/parse';
 
 export interface Chat {
   id: string;
@@ -164,17 +165,28 @@ const useAgentChat = ({ chatSessionId }: { chatSessionId: string }) => {
   };
 
   // ── SSE 응답 수신 ─────────────────────────────────────
-  const receiveMessage = async (data: { qna_candidates: ReceiveMsg[] } | null) => {
+  const receiveMessage = async (data: {id: string, content: string}) => {
     if (!data) return;
 
-    const parsedData = JSON.parse(data as unknown as string) as { qna_candidates: ReceiveMsg[] };
+    const answer = extractPartialXml(data.content, 'answer');
 
-    for (const candidate of parsedData.qna_candidates) {
+    // console.log(answer)
+    const existingChat = await db.query(`
+      SELECT id from chat WHERE id = $1
+    `, [data.id]);
+    if (existingChat.rows.length > 0) {
+      await db.query(`
+        UPDATE chat
+        SET content = $1
+        WHERE id = $2
+      `, [answer, data.id]);
+      return;
+    } else {
       await saveChat({
-        id: uuidv7(),
+        id: data.id,
         chatSessionId,
         from: ChatFrom.BOT,
-        content: candidate.answer,
+        content: answer,
         mode: ChatMode.AGENT,
         createdat: new Date().toISOString(),
       });
